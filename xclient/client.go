@@ -26,6 +26,7 @@ type Client struct {
 
 // Config defines the config properties of the package
 type Config struct {
+	// eg map[string]string{"Authorization": "bearer " + cfg.Token},
 	CustomHeader  map[string]string
 	ContentFormat string
 	WaitMin       time.Duration

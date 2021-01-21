@@ -11,7 +11,7 @@ type Helper struct {
 	logger *xlogger.Logger
 }
 
-// NewHelper constructs the class
+// NewHelper constructs a helper class to ease the most mundane test tasks
 func NewHelper(s *suite.Suite, logger *xlogger.Logger) *Helper {
 	return &Helper{suite: s, logger: logger}
 }
