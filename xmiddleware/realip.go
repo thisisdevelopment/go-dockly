@@ -41,10 +41,10 @@ func RealIP(h http.Handler) http.Handler {
 func realIP(r *http.Request) string {
 	var ip string
 
-	if xrip := r.Header.Get(xRealIP); xrip != "" {
-		ip = xrip
-	} else if xcip := r.Header.Get(xClientIP); xcip != "" {
+	if xcip := r.Header.Get(xClientIP); xcip != "" {
 		ip = xcip
+	} else if xrip := r.Header.Get(xRealIP); xrip != "" {
+		ip = xrip
 	} else if xff := r.Header.Get(xForwardedFor); xff != "" {
 		i := strings.Index(xff, ", ")
 		if i == -1 {
