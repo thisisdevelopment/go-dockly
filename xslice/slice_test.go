@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/thisisdevelopment/go-dockly/xslice"
+        "github.com/stretchr/testify/assert"
 )
 
 func TestUniqStr(t *testing.T) {
@@ -27,4 +28,11 @@ func TestUniqStr(t *testing.T) {
 		}
 	}
 
+}
+
+func TestContains(t *testing.T) {
+        var ok bool
+	data := []string{"abc","def"}
+	ok = xslice.Contains(data,"abc")
+        assert.Equal(t, ok, true, "they should be equal")
 }
