@@ -1,6 +1,7 @@
 package xclient
 
 import (
+	"context"
 	"fmt"
 	"io"
 
@@ -8,10 +9,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-// Do sends the request to the specified rest path and unmarshals the response into the
-// desired results interface{} if not provided as null and under the condition that
-// the received status response is as expected
-func (cli *Client) Do(method, path string, params io.Reader, result interface{}) (actualStatusCode int, err error) {
+func (cli *Client) Do(ctx context.Context, method, path string, params io.Reader, result interface{}) (actualStatusCode int, err error) {
 	url := fmt.Sprintf("%s/%s", cli.baseURL, path)
 
 	cli.log.Debugln("requesting: ", aurora.Yellow(url))
@@ -19,6 +17,12 @@ func (cli *Client) Do(method, path string, params io.Reader, result interface{})
 	if err != nil {
 		return 0, err
 	}
+
+	err = cli.config.Limiter.Wait(ctx) // blocking call to honor the rate limit
+	if err != nil {
+		return 0, err
+	}
+	req = req.WithContext(ctx)
 
 	res, err := cli.http.Do(req)
 	if err != nil {
@@ -34,9 +38,11 @@ func (cli *Client) Do(method, path string, params io.Reader, result interface{})
 			}
 		}
 	}
-
-	// 	check in case we are not interested in the response body
-	if result != nil && err == nil {
+	if err != nil {
+		return 0, err
+	}
+	// 	check for nil in case we are not interested in the response body
+	if result != nil {
 		err = cli.readResponse(res.Body, result)
 	}
 
