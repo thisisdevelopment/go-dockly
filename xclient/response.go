@@ -18,7 +18,7 @@ func (cli *Client) readResponse(b io.ReadCloser, result interface{}) error {
 
 	err = json.Unmarshal(body, result)
 	if err != nil {
-		return errors.Wrapf(err, "unmarshal response into expected interface failed for: %s", string(body))
+		return errors.Wrapf(err, "unmarshal response failed: %s", string(body))
 	}
 
 	return nil
