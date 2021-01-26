@@ -121,6 +121,21 @@ func (l *Logger) Log(log *logrus.Logger) *logrus.Entry {
 	return &logrus.Entry{}
 }
 
+// WithField proxy method
+func (l *Logger) WithField(key string, value interface{}) *logrus.Entry {
+	return l.log.WithField(key, value)
+}
+
+// WithFields proxy method
+func (l *Logger) WithFields(fields logrus.Fields) *logrus.Entry {
+	return l.log.WithFields(fields)
+}
+
+// WithError proxy method
+func (l *Logger) WithError(err error) *logrus.Entry {
+	return l.log.WithError(err)
+}
+
 var (
 	// GitCommit holds short commit hash of source tree
 	GitCommit string
