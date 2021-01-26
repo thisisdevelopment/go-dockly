@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/stretchr/testify/require"
+	"golang.org/x/net/context"
 	"gopkg.in/h2non/gock.v1"
 )
 
@@ -20,7 +21,7 @@ func (s *TestSuite) Test_Client() {
 
 	result := map[string]string{}
 
-	actualStatus, err := s.client.Do("GET", expectedPath, nil, &result)
+	actualStatus, err := s.client.Do(context.Background(), "GET", expectedPath, nil, &result)
 	require.NoError(s.T(), err)
 	require.NotNil(s.T(), result)
 	require.Equal(s.T(), expected, result)
