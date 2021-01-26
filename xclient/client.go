@@ -80,6 +80,6 @@ func GetDefaultConfig() *Config {
 	}
 }
 
-func defaultRateLimit() *rate.RateLimit {
+func defaultRateLimit() *rate.Limiter {
 	return rate.NewLimiter(rate.Every(1*time.Second), 10)
 }
