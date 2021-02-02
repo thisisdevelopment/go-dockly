@@ -15,6 +15,7 @@ type SyncSlice struct {
 type SyncSliceItem struct {
 	Idx int
 	Val interface{}
+  State bool
 }
 
 // NewSyncSlice constructs a concurrent slice
@@ -24,18 +25,80 @@ func NewSyncSlice() *SyncSlice {
 	}
 }
 
-// Append adds an element to the slice
-func (s *SyncSlice) Append(item interface{}) {
+// LastElm returns the last element of the slice
+func (s *SyncSlice) LastElm() <-chan SyncSliceItem {
+	var ch = make(chan SyncSliceItem)
+	go func() {
+		s.Lock()
+		defer s.Unlock()
+    if len(s.items) == 0 {
+      ch <- SyncSliceItem{0, nil, false}
+    } else {
+      ch <- SyncSliceItem{len(s.items), s.items[len(s.items)-1], true}
+    }
+		close(ch)
+	}()
+
+	return ch
+}
+
+// Uniq deduplicates the slice
+func (s *SyncSlice) Uniq() {
 	s.Lock()
 	defer s.Unlock()
-	s.items = append(s.items, item)
+
+	var m = make(map[interface{}]bool)
+	for _, v := range s.items {
+		m[v] = true
+	}
+	
+	s.items = s.items[:0]
+	for k, _ := range m {
+		s.items = append(s.items,k)
+	}
+}
+
+// Cut removes the elements between i and j from the slice
+func (s *SyncSlice) Cut(i, j int) bool {
+	s.Lock()
+	defer s.Unlock()
+
+  if i < 0 || i > len(s.items) || j < 0 || j > len(s.items) || j < i {
+    return false
+  }
+
+	copy(s.items[i:], s.items[j:])
+  s.items = s.items[:len(s.items)-(j-i)]
+	return true
+}
+
+// Strip removes all occurrences of val from slice
+func (s *SyncSlice) Strip(val interface{}) {
+	s.Lock()
+	defer s.Unlock()
+
+	res := s.items[:0]
+	for _, x := range s.items {
+		if x != val {
+			res = append(res,x)
+		}
+	}
+
+  s.items = res
 }
 
 // Del removes the element at index from slice
-func (s *SyncSlice) Del(i int) {
+func (s *SyncSlice) Del(i int) bool {
 	s.Lock()
 	defer s.Unlock()
-	s.items = append(s.items[:i], s.items[i+1:]...)
+
+  if i < 0 || i >= len(s.items) {
+    return false
+  }
+
+  s.items[i] = s.items[len(s.items)-1]
+  s.items = s.items[:len(s.items)-1]
+  return true
 }
 
 // Pop removes the last element from slice and returns both
@@ -44,23 +107,31 @@ func (s *SyncSlice) Pop() <-chan SyncSliceItem {
 	go func() {
 		s.Lock()
 		defer s.Unlock()
-		var last = len(s.items) - 1
-		ch <- SyncSliceItem{last, s.items[last]}
-		s.items = s.items[:last]
+    if len(s.items) == 0 {
+      ch <- SyncSliceItem{0, nil, false}
+    } else {
+      var last = len(s.items) - 1
+      ch <- SyncSliceItem{last, s.items[last], true}
+      s.items = s.items[:last]
+    }
 		close(ch)
 	}()
 
 	return ch
 }
 
-// Shift removes the first element from slice and returns both
+// Shift removes the first element from slice and returns it
 func (s *SyncSlice) Shift() <-chan SyncSliceItem {
 	var ch = make(chan SyncSliceItem)
 	go func() {
 		s.Lock()
 		defer s.Unlock()
-		ch <- SyncSliceItem{0, s.items[0]}
-		s.items = s.items[1:]
+    if len(s.items) == 0 {
+      ch <- SyncSliceItem{0, nil, false}
+    } else {
+      ch <- SyncSliceItem{0, s.items[0], true}
+      s.items = s.items[1:]
+    }
 		close(ch)
 	}()
 
@@ -71,16 +142,31 @@ func (s *SyncSlice) Shift() <-chan SyncSliceItem {
 func (s *SyncSlice) UnShift(v interface{}) {
 	s.Lock()
 	defer s.Unlock()
-	var is []interface{} = make([]interface{}, 1)
-	is[0] = v
-	s.items = append(is, s.items...)
+
+	s.items = append([]interface{}{v}, s.items...)
 	return
+}
+
+// Filter ing without allocating
+func (s *SyncSlice) Filter(val interface{}) {
+	s.Lock()
+	defer s.Unlock()
+
+	b := s.items[:0]
+	for _, x := range s.items {
+		if val == x {
+			b = append(b, x)
+		}
+	}
+
+	s.items = b
 }
 
 // Contains returns true if value is contained in slice
 func (s *SyncSlice) Contains(val interface{}) bool {
 	s.Lock()
 	defer s.Unlock()
+
 	for _, x := range s.items {
 		if x == val {
 			return true
@@ -90,18 +176,69 @@ func (s *SyncSlice) Contains(val interface{}) bool {
 	return false
 }
 
-// Filter ing without allocating
-func (s *SyncSlice) Filter(val interface{}) []interface{} {
+// Reverse the order of a slice
+func (s *SyncSlice) Reverse() {
 	s.Lock()
 	defer s.Unlock()
-	b := s.items[:0]
-	for _, x := range s.items {
-		if val == x {
-			b = append(b, x)
-		}
-	}
 
-	return b
+  var opp int
+	for i := len(s.items)/2 - 1; i >= 0; i-- {
+		opp = len(s.items) - 1 - i
+		s.items[i], s.items[opp] = s.items[opp], s.items[i]
+	}
+}
+
+// Shuffle randomizes the order of a slice
+func (s *SyncSlice) Shuffle() {
+	s.Lock()
+	defer s.Unlock()
+
+	for i := len(s.items) - 1; i > 0; i-- {
+		j := rand.Intn(i + 1)
+		s.items[i], s.items[j] = s.items[j], s.items[i]
+	}
+}
+
+// ContainsAny returns any matches from tgt slice
+func (s *SyncSlice) ContainsAny(tgt []interface{}) (hits []interface{}, ok bool) {
+	var m = make(map[interface{}]bool)
+	for _, v := range s.items {
+		m[v] = true
+	}
+  for _, v := range tgt {
+    if m[v] {
+      hits = append(hits,v)
+    }
+  }
+
+  return hits, len(hits) > 0
+}
+
+// Insert s one string slice in the other at the given index
+func (s *SyncSlice) Insert(ins []interface{}, i int) {
+  s.Lock()
+  defer s.Unlock()
+
+  if i > len(s.items) { i = len(s.items) }
+  var start = make([]interface{}, i)
+  copy(start,s.items[:i])
+  start = append(start,ins...)
+  s.items = append(start,s.items[i:]...)
+}
+
+
+// Append elements to the slice
+func (s *SyncSlice) Append(items []interface{}) {
+	s.Lock()
+	defer s.Unlock()
+	s.items = append(s.items, items...)
+}
+
+// Clear s all elements from the slice
+func (s *SyncSlice) Clear() {
+	s.Lock()
+	defer s.Unlock()
+	s.items = s.items[:0]
 }
 
 // Len returns the length of all elements in the slice
@@ -111,61 +248,37 @@ func (s *SyncSlice) Len() int {
 	return len(s.items)
 }
 
-// Reverse the order of a slice
-func (s *SyncSlice) Reverse() {
-	s.Lock()
-	defer s.Unlock()
-	for i := len(s.items)/2 - 1; i >= 0; i-- {
-		var opp = len(s.items) - 1 - i
-		s.items[i], s.items[opp] = s.items[opp], s.items[i]
-	}
-}
-
-// Shuffle randomizes the order of a slice
-func (s *SyncSlice) Shuffle() {
-	s.Lock()
-	defer s.Unlock()
-	for i := len(s.items) - 1; i > 0; i-- {
-		j := rand.Intn(i + 1)
-		s.items[i], s.items[j] = s.items[j], s.items[i]
-	}
-}
-
 // Get returns the element at index of slice or nil
 func (s *SyncSlice) Get(i int) <-chan SyncSliceItem {
 	var ch = make(chan SyncSliceItem)
 	go func() {
 		s.Lock()
 		defer s.Unlock()
-		ch <- SyncSliceItem{i, s.items[i]} // todo be careful with out of range errors - use Len
+    if i < 0 || i >= len(s.items) {
+      ch <- SyncSliceItem{0, nil, false}
+    } else {
+      ch <- SyncSliceItem{i, s.items[i], true}
+    }
 		close(ch)
 	}()
 
 	return ch
 }
 
-// LastElm returns the last element of the slice
-func (s *SyncSlice) LastElm() <-chan SyncSliceItem {
-	var ch = make(chan SyncSliceItem)
-	go func() {
-		s.Lock()
-		defer s.Unlock()
-		ch <- SyncSliceItem{len(s.items), s.items[len(s.items)-1]}
-		close(ch)
-	}()
-
-	return ch
+func (s *SyncSlice) GetAll() []interface{} {
+	s.Lock()
+	defer s.Unlock()
+	return s.items
 }
 
 // Iter outputs each item over a channel to the caller
 func (s *SyncSlice) Iter() <-chan SyncSliceItem {
 	var ch = make(chan SyncSliceItem)
-
 	go func() {
 		s.Lock()
 		defer s.Unlock()
 		for i, val := range s.items {
-			ch <- SyncSliceItem{i, val}
+			ch <- SyncSliceItem{i, val, true}
 		}
 		close(ch)
 	}()
