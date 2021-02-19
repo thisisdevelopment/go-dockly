@@ -18,17 +18,17 @@ type SyncSliceItem struct {
 }
 
 // NewSyncSlice constructs a concurrent slice
-func NewSyncSlice(initial ...interface{}) *SyncSlice {
+func NewSyncSlice(initial []interface{}) *SyncSlice {
 
-	if initial == nil {
-		return &SyncSlice{
-			items: make([]interface{}, 0),
-		}
+	var s = &SyncSlice{
+		items: make([]interface{}, 0),
 	}
 
-	return &SyncSlice{
-		items: initial,
+	for _, v := range initial {
+		s.items = append(s.items, v)
 	}
+
+	return s
 }
 
 // LastElm returns the last element of the slice
@@ -232,10 +232,12 @@ func (s *SyncSlice) Insert(ins []interface{}, i int) {
 }
 
 // Append elements to the slice
-func (s *SyncSlice) Append(items []interface{}) {
+func (s *SyncSlice) Append(items ...interface{}) {
 	s.Lock()
 	defer s.Unlock()
-	s.items = append(s.items, items...)
+	for _, v := range items {
+		s.items = append(s.items, v)
+	}
 }
 
 // Clear s all elements from the slice

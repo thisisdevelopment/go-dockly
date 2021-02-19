@@ -3,6 +3,7 @@ package xslice_test
 import (
 	"testing"
 
+	"github.com/davecgh/go-spew/spew"
 	"github.com/stretchr/testify/assert"
 	"github.com/thisisdevelopment/go-dockly/xslice"
 )
@@ -10,12 +11,12 @@ import (
 var syncslice = xslice.NewSyncSlice([]interface{}{"one", "two"})
 
 func TestShift(t *testing.T) {
-
-	res := <-syncslice.Shift()
-	assert.Equal(t, res.Val.(string), "one")
+	var res = <-syncslice.Shift()
+	spew.Dump(res)
+	assert.Equal(t, res.Val, "one")
 }
-func TestInsert(t *testing.T) {
 
-	syncslice.Append([]interface{}{"three", "four"})
+func TestInsert(t *testing.T) {
+	syncslice.Append("three", "four")
 	assert.GreaterOrEqual(t, syncslice.Len(), 3)
 }
