@@ -1,17 +1,15 @@
 package xslice
 
-import (
-	"math/rand"
-)
+import "math/rand"
 
 // Reference https://github.com/golang/go/wiki/SliceTricks
 
 // LastElm returns the last element of the slice
 func LastElm(s []string) (string, bool) {
-	if len(s) == 0 {
-		return "", false
-	}
-	return s[len(s)-1], true
+  if len(s) == 0 {
+    return "", false
+  }
+  return s[len(s)-1], true
 }
 
 // Uniq deduplicates the slice
@@ -20,10 +18,10 @@ func Uniq(s []string) []string {
 	for _, v := range s {
 		m[v] = true
 	}
-
+	
 	s = s[:0]
 	for k, _ := range m {
-		s = append(s, k)
+		s = append(s,k)
 	}
 
 	return s
@@ -31,9 +29,9 @@ func Uniq(s []string) []string {
 
 // Cut removes the elements between i and j from the slice
 func Cut(s []string, i, j int) ([]string, bool) {
-	if i < 0 || i > len(s) || j < 0 || j > len(s) || j < i {
-		return s, false
-	}
+  if i < 0 || i > len(s) || j < 0 || j > len(s) || j < i {
+    return s, false
+  }
 
 	copy(s[i:], s[j:])
 	return s[:len(s)-(j-i)], true
@@ -42,9 +40,9 @@ func Cut(s []string, i, j int) ([]string, bool) {
 // Strip removes all occurrences of val from slice
 func Strip(s []string, val string) []string {
 	res := s[:0]
-	for _, x := range s {
+	for _ , x := range s {
 		if x != val {
-			res = append(res, x)
+			res = append(res,x)
 		}
 	}
 
@@ -53,9 +51,9 @@ func Strip(s []string, val string) []string {
 
 // Del removes the element at index from slice
 func Del(s []string, i int) ([]string, bool) {
-	if i < 0 || i >= len(s) {
-		return s, false
-	}
+  if i < 0 || i >= len(s) {
+    return s, false
+  }
 
 	s[i] = s[len(s)-1]
 	return s[:len(s)-1], true
@@ -63,19 +61,19 @@ func Del(s []string, i int) ([]string, bool) {
 
 // Pop removes the last element from slice and returns both
 func Pop(s []string) (string, []string, bool) {
-	last, ok := LastElm(s)
-	if !ok {
-		return last, s, ok
-	}
+  last, ok := LastElm(s)
+  if !ok {
+    return last, s, ok
+  }
 
-	return last, s[:len(s)-1], ok
+  return last, s[:len(s)-1], ok
 }
 
 // Shift removes the first element from slice and returns both
 func Shift(s []string) (string, []string, bool) {
-	if len(s) == 0 {
-		return "", s, false
-	}
+  if len(s) == 0 {
+    return "", s, false
+  }
 
 	return s[0], s[1:], true
 }
@@ -110,7 +108,7 @@ func Contains(s []string, val string) bool {
 
 // Reverse the order of a slice
 func Reverse(s []string) []string {
-	var opp int
+  var opp int
 	for i := len(s)/2 - 1; i >= 0; i-- {
 		opp = len(s) - 1 - i
 		s[i], s[opp] = s[opp], s[i]
@@ -135,32 +133,20 @@ func ContainsAny(src, tgt []string) (hits []string, ok bool) {
 	for _, v := range src {
 		m[v] = true
 	}
-	for _, v := range tgt {
-		if m[v] {
-			hits = append(hits, v)
-		}
-	}
+  for _, v := range tgt {
+    if m[v] {
+      hits = append(hits,v)
+    }
+  }
 
-	return hits, len(hits) > 0
+  return hits, len(hits) > 0
 }
 
 // Insert s one string slice in the other at the given index
 func Insert(s, ins []string, i int) []string {
-	if i > len(s) {
-		i = len(s)
-	}
-	var start = make([]string, i)
-	copy(start, s[:i])
-	start = append(start, ins...)
-	return append(start, s[i:]...)
-}
-
-// AppendNotEmpty appends string slice items which are not empty
-func AppendNotEmpty(s []string, appends []string) []string {
-	for _, v := range appends {
-		if v != "" {
-			s = append(s, v)
-		}
-	}
-	return s
+  if i > len(s) { i = len(s) }
+  var start = make([]string, i)
+  copy(start,s[:i])
+  start = append(start,ins...)
+  return append(start,s[i:]...)
 }
