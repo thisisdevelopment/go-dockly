@@ -4,8 +4,8 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/thisisdevelopment/go-dockly/xslice"
-	//"github.com/stretchr/testify/assert"
 )
 
 func TestUniq(t *testing.T) {
@@ -178,14 +178,12 @@ func TestFilter(t *testing.T) {
 	}
 }
 
-/*
 func TestContains(t *testing.T) {
-  var ok bool
-  data := []string{"abc","def"}
-  ok = xslice.Contains(data,"abc")
-  assert.Equal(t, ok, true, "did not match")
+	var ok bool
+	data := []string{"abc", "def"}
+	ok = xslice.Contains(data, "abc")
+	assert.Equal(t, ok, true, "did not match")
 }
-*/
 
 func TestReverse(t *testing.T) {
 

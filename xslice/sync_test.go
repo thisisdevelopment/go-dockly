@@ -4,61 +4,14 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/thisisdevelopment/go-dockly/xslice"
-	//"github.com/stretchr/testify/assert"
 )
-
-// make a Test function with a goroutine (=integration test), call couple of SyncSlice functions concurrently. + create big slices for testing.
-// do not sort : find alternative to map.
-
-/*
-func AllTest(t *testing.T) {
-
-
-	expdata := make(map[string]struct{}, 0)
-
-
-	uniqdata := []struct{ in, out []interface{} }{
-		{[]interface{}{}, []interface{}{}},
-		{[]interface{}{"", "", ""}, []interface{}{""}},
-		{[]interface{}{"a", "a"}, []interface{}{"a"}},
-		{[]interface{}{"a", "b", "a"}, []interface{}{"a", "b"}},
-		{[]interface{}{"a", "b", "a", "b"}, []interface{}{"a", "b"}},
-		{[]interface{}{"a", "b", "b", "a", "b"}, []interface{}{"a", "b"}},
-		{[]interface{}{"a", "a", "b", "b", "a", "b"}, []interface{}{"a", "b"}},
-		{[]interface{}{"a", "b", "c", "a", "b", "c"}, []interface{}{"a", "b", "c"}},
-	}
-
-	cutdata := []struct {
-		in, out    []interface{}
-		start, end int
-	}{
-		{[]interface{}{}, []interface{}{}, 0, 0},
-		{[]interface{}{"", "", ""}, []interface{}{""}, 1, 3},
-		{[]interface{}{"a", "a"}, []interface{}{"a"}, 1, 2},
-		{[]interface{}{"a", "b", "a"}, []interface{}{"a", "b"}, 2, 3},
-		{[]interface{}{"a", "b", "a", "b"}, []interface{}{"a", "b"}, 2, 4},
-		{[]interface{}{"a", "a", "b", "b", "a", "b"}, []interface{}{"a", "b"}, 0, 4},
-		{[]interface{}{"a", "b", "c", "a", "b", "c"}, []interface{}{"a", "b", "c"}, 3, 6},
-	}
-
-	s := xslice.NewSyncSlice()
-	for _, exp := range data {
-		go func() {
-			s.Append(exp.in)
-			s.Uniq()
-
-
-		}
-
-
-}
-*/
 
 func TestUniq(t *testing.T) {
 
 	data := []struct{ in, out []interface{} }{
-		{[]interface{}{}, []interface{}{}},
+		//		{[]interface{}{}, []interface{}{}},
 		{[]interface{}{"", "", ""}, []interface{}{""}},
 		{[]interface{}{"a", "a"}, []interface{}{"a"}},
 		{[]interface{}{"a", "b", "a"}, []interface{}{"a", "b"}},
@@ -68,7 +21,7 @@ func TestUniq(t *testing.T) {
 		{[]interface{}{"a", "b", "c", "a", "b", "c"}, []interface{}{"a", "b", "c"}},
 	}
 
-	s := xslice.NewSyncSlice()
+	s := xslice.NewSyncSlice(nil)
 	for _, exp := range data {
 		s.Append(exp.in)
 		s.Uniq()
@@ -96,7 +49,7 @@ func TestCut(t *testing.T) {
 		{[]interface{}{"a", "b", "c", "a", "b", "c"}, []interface{}{"a", "b", "c"}, 3, 6},
 	}
 
-	s := xslice.NewSyncSlice()
+	s := xslice.NewSyncSlice(nil)
 	for _, exp := range data {
 		s.Append(exp.in)
 		go func() {
@@ -124,7 +77,7 @@ func TestStrip(t *testing.T) {
 		{[]interface{}{"c", "c", "c"}, []interface{}{}, "c"},
 	}
 
-	s := xslice.NewSyncSlice()
+	s := xslice.NewSyncSlice(nil)
 	for _, exp := range data {
 		s.Append(exp.in)
 		s.Strip(exp.val)
@@ -150,7 +103,7 @@ func TestDel(t *testing.T) {
 		{[]interface{}{"a", "b", "c"}, []interface{}{"a", "b"}, 2},
 	}
 
-	s := xslice.NewSyncSlice()
+	s := xslice.NewSyncSlice(nil)
 	for _, exp := range data {
 		s.Append(exp.in)
 		s.Del(exp.index)
@@ -174,7 +127,7 @@ func TestPop(t *testing.T) {
 		{[]interface{}{"a", "b"}, []interface{}{"a"}, "b"},
 	}
 
-	s := xslice.NewSyncSlice()
+	s := xslice.NewSyncSlice(nil)
 	for _, exp := range data {
 		s.Append(exp.in)
 		pop := <-s.Pop()
@@ -202,7 +155,7 @@ func TestShift(t *testing.T) {
 		{[]interface{}{"a", "b", "c"}, []interface{}{"b", "c"}, "a"},
 	}
 
-	s := xslice.NewSyncSlice()
+	s := xslice.NewSyncSlice(nil)
 	for _, exp := range data {
 		s.Append(exp.in)
 		shift := <-s.Shift()
@@ -229,7 +182,7 @@ func TestUnShift(t *testing.T) {
 		{[]interface{}{"b", "c"}, []interface{}{"a", "b", "c"}, "a"},
 	}
 
-	s := xslice.NewSyncSlice()
+	s := xslice.NewSyncSlice(nil)
 	for _, exp := range data {
 		s.Append(exp.in)
 		s.UnShift(exp.unshift)
@@ -254,7 +207,7 @@ func TestFilter(t *testing.T) {
 		{[]interface{}{"a", "b", "c"}, []interface{}{"b"}, "b"},
 	}
 
-	s := xslice.NewSyncSlice()
+	s := xslice.NewSyncSlice(nil)
 	for _, exp := range data {
 		s.Append(exp.in)
 		s.Filter(exp.filter)
@@ -267,14 +220,13 @@ func TestFilter(t *testing.T) {
 	}
 }
 
-/*
 func TestContains(t *testing.T) {
-  var ok bool
-  data := []interface{}{"abc","def"}
-  ok = xslice.Contains(data,"abc")
-  assert.Equal(t, ok, true, "did not match")
+	var ok bool
+
+	s := xslice.NewSyncSlice([]interface{}{"abc", "def"})
+	ok = s.Contains("abc")
+	assert.Equal(t, ok, true, "did not match")
 }
-*/
 
 func TestReverse(t *testing.T) {
 
@@ -285,7 +237,7 @@ func TestReverse(t *testing.T) {
 		{[]interface{}{"a", "b", "c"}, []interface{}{"c", "b", "a"}},
 	}
 
-	s := xslice.NewSyncSlice()
+	s := xslice.NewSyncSlice(nil)
 	for _, exp := range data {
 		s.Append(exp.in)
 		s.Reverse()
@@ -307,7 +259,7 @@ func TestContainsAny(t *testing.T) {
 		{[]interface{}{"a", "b", "c"}, []interface{}{"b", "c", "d"}, []interface{}{"b", "c"}},
 	}
 
-	s := xslice.NewSyncSlice()
+	s := xslice.NewSyncSlice(nil)
 	for _, exp := range data {
 		s.Append(exp.src)
 		out, ok := s.ContainsAny(exp.tgt)
@@ -332,7 +284,7 @@ func TestInsert(t *testing.T) {
 		{[]interface{}{"a", "d"}, []interface{}{"b", "c"}, []interface{}{"a", "b", "c", "d"}, 1},
 	}
 
-	s := xslice.NewSyncSlice()
+	s := xslice.NewSyncSlice(nil)
 	for _, exp := range data {
 		s.Append(exp.in)
 		s.Insert(exp.ins, exp.index)
@@ -356,7 +308,7 @@ func TestAppendNotNil(t *testing.T) {
 		{[]interface{}{"b"}, []interface{}{"a", "", "", "c"}, []interface{}{"a", "b", "c"}},
 	}
 
-	s := xslice.NewSyncSlice()
+	s := xslice.NewSyncSlice(nil)
 	for _, exp := range data {
 		s.Append(exp.in)
 		s.AppendNotNil(exp.app)
