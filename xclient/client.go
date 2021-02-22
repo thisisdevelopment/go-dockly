@@ -28,6 +28,7 @@ type Client struct {
 type Config struct {
 	CustomHeader  map[string]string
 	ContentFormat string
+	TrackProgress bool
 	Limiter       *rate.Limiter // nil here will use default rate limit
 	MaxRetry      int
 	WaitMin       time.Duration
@@ -75,6 +76,7 @@ func GetDefaultConfig() *Config {
 		WaitMin:       500 * time.Millisecond,
 		WaitMax:       2 * time.Second,
 		MaxRetry:      5,
+		TrackProgress: false,
 		ContentFormat: "application/json",
 		Limiter:       defaultRateLimit(),
 	}

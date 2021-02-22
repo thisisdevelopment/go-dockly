@@ -4,8 +4,11 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"strconv"
+	"time"
 
 	"github.com/logrusorgru/aurora"
+	"github.com/machinebox/progress"
 	"github.com/pkg/errors"
 )
 
@@ -22,9 +25,8 @@ func (cli *Client) Do(ctx context.Context, method, path string, params io.Reader
 	if err != nil {
 		return 0, err
 	}
-	req = req.WithContext(ctx)
 
-	res, err := cli.http.Do(req)
+	res, err := cli.http.Do(req.WithContext(ctx))
 	if err != nil {
 		for i := 0; i < cli.config.MaxRetry; i++ {
 			err = cli.handleBackoff(i)
@@ -38,14 +40,36 @@ func (cli *Client) Do(ctx context.Context, method, path string, params io.Reader
 			}
 		}
 	}
+	defer res.Body.Close()
 	if err != nil {
 		return 0, err
 	}
+
+	if cli.config.TrackProgress {
+		var contentLengthHeader = res.Header.Get("Content-Length")
+		if contentLengthHeader == "" {
+			return res.StatusCode, errors.New("cannot determine progress without Content-Length")
+		}
+
+		size, err := strconv.ParseInt(contentLengthHeader, 10, 64)
+		if err != nil {
+			return res.StatusCode, errors.Wrapf(err, "bad content-length %q", contentLengthHeader)
+		}
+
+		var r = progress.NewReader(res.Body)
+		go func() {
+			var progressChan = progress.NewTicker(ctx, r, size, 1*time.Second)
+
+			for p := range progressChan {
+				cli.log.Printf("%v remaining...", p.Remaining().Round(time.Second))
+			}
+		}()
+	}
+
 	// 	check for nil in case we are not interested in the response body
 	if result != nil {
 		err = cli.readResponse(res.Body, result)
 	}
 
-	res.Body.Close()
 	return res.StatusCode, err
 }

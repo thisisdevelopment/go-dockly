@@ -11,7 +11,7 @@ import (
 func (s *TestSuite) Test_Client() {
 
 	expected := map[string]string{"foo": "bar"}
-	expectedPath := "/bar"
+	expectedPath := "bar"
 	expectedStatus := http.StatusOK
 
 	gock.New(s.baseURL).
