@@ -18,16 +18,15 @@ type SyncSliceItem struct {
 }
 
 // NewSyncSlice constructs a concurrent slice
-func NewSyncSlice(initial []interface{}) *SyncSlice {
+func NewSyncSlice(initial ...interface{}) *SyncSlice {
 
 	var s = &SyncSlice{
-		items: make([]interface{}, 0),
+		items: make([]interface{}, 0, 10),
 	}
 
-	for _, v := range initial {
-		s.items = append(s.items, v)
-	}
-
+	//for _, v := range initial {
+	s.items = append(s.items, initial...)
+	//}
 	return s
 }
 
@@ -52,14 +51,16 @@ func (s *SyncSlice) Uniq() {
 	defer s.Unlock()
 
 	var m = make(map[interface{}]bool)
+
+	t := s.items[:0]
 	for _, v := range s.items {
-		m[v] = true
+		if _, exists := m[v]; !exists {
+			t = append(t, v)
+			m[v] = true
+		}
 	}
 
-	s.items = s.items[:0]
-	for k, _ := range m {
-		s.items = append(s.items, k)
-	}
+	s.items = t
 }
 
 // Cut removes the elements between i and j from the slice
@@ -235,6 +236,7 @@ func (s *SyncSlice) Insert(ins []interface{}, i int) {
 func (s *SyncSlice) Append(items ...interface{}) {
 	s.Lock()
 	defer s.Unlock()
+
 	for _, v := range items {
 		s.items = append(s.items, v)
 	}

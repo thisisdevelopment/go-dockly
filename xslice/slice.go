@@ -17,16 +17,16 @@ func LastElm(s []string) (string, bool) {
 // Uniq deduplicates the slice
 func Uniq(s []string) []string {
 	var m = make(map[string]bool)
+
+	t := s[:0]
 	for _, v := range s {
-		m[v] = true
+		if _, exists := m[v]; !exists {
+			t = append(t, v)
+			m[v] = true
+		}
 	}
 
-	s = s[:0]
-	for k, _ := range m {
-		s = append(s, k)
-	}
-
-	return s
+	return t
 }
 
 // Cut removes the elements between i and j from the slice

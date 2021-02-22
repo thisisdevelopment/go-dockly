@@ -249,7 +249,7 @@ func TestAppendNotEmpty(t *testing.T) {
 		{[]string{}, []string{}, []string{}},
 		{[]string{}, []string{"a", ""}, []string{"a"}},
 		{[]string{"a"}, []string{"b"}, []string{"a", "b"}},
-		{[]string{"b"}, []string{"a", "", "", "c"}, []string{"a", "b", "c"}},
+		{[]string{"b"}, []string{"a", "", "", "c"}, []string{"b", "a", "c"}},
 	}
 
 	for _, exp := range data {

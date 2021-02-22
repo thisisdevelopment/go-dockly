@@ -11,7 +11,7 @@ import (
 func TestUniq(t *testing.T) {
 
 	data := []struct{ in, out []interface{} }{
-		//		{[]interface{}{}, []interface{}{}},
+		{[]interface{}{}, []interface{}{}},
 		{[]interface{}{"", "", ""}, []interface{}{""}},
 		{[]interface{}{"a", "a"}, []interface{}{"a"}},
 		{[]interface{}{"a", "b", "a"}, []interface{}{"a", "b"}},
@@ -21,9 +21,9 @@ func TestUniq(t *testing.T) {
 		{[]interface{}{"a", "b", "c", "a", "b", "c"}, []interface{}{"a", "b", "c"}},
 	}
 
-	s := xslice.NewSyncSlice(nil)
+	s := xslice.NewSyncSlice()
 	for _, exp := range data {
-		s.Append(exp.in)
+		s.Append(exp.in...)
 		s.Uniq()
 		for item := range s.Iter() {
 			if !reflect.DeepEqual(item.Val, exp.out[item.Idx]) {
@@ -49,9 +49,9 @@ func TestCut(t *testing.T) {
 		{[]interface{}{"a", "b", "c", "a", "b", "c"}, []interface{}{"a", "b", "c"}, 3, 6},
 	}
 
-	s := xslice.NewSyncSlice(nil)
+	s := xslice.NewSyncSlice()
 	for _, exp := range data {
-		s.Append(exp.in)
+		s.Append(exp.in...)
 		go func() {
 			s.Cut(exp.start, exp.end)
 			for item := range s.Iter() {
@@ -77,9 +77,9 @@ func TestStrip(t *testing.T) {
 		{[]interface{}{"c", "c", "c"}, []interface{}{}, "c"},
 	}
 
-	s := xslice.NewSyncSlice(nil)
+	s := xslice.NewSyncSlice()
 	for _, exp := range data {
-		s.Append(exp.in)
+		s.Append(exp.in...)
 		s.Strip(exp.val)
 		for item := range s.Iter() {
 			if !reflect.DeepEqual(item.Val, exp.out[item.Idx]) {
@@ -103,9 +103,9 @@ func TestDel(t *testing.T) {
 		{[]interface{}{"a", "b", "c"}, []interface{}{"a", "b"}, 2},
 	}
 
-	s := xslice.NewSyncSlice(nil)
+	s := xslice.NewSyncSlice()
 	for _, exp := range data {
-		s.Append(exp.in)
+		s.Append(exp.in...)
 		s.Del(exp.index)
 		for item := range s.Iter() {
 			if !reflect.DeepEqual(item.Val, exp.out[item.Idx]) {
@@ -127,9 +127,9 @@ func TestPop(t *testing.T) {
 		{[]interface{}{"a", "b"}, []interface{}{"a"}, "b"},
 	}
 
-	s := xslice.NewSyncSlice(nil)
+	s := xslice.NewSyncSlice()
 	for _, exp := range data {
-		s.Append(exp.in)
+		s.Append(exp.in...)
 		pop := <-s.Pop()
 		if pop != nil && pop.Val != exp.pop {
 			t.Fatalf("%q didn't match %q\n", pop.Val, exp.pop)
@@ -155,9 +155,9 @@ func TestShift(t *testing.T) {
 		{[]interface{}{"a", "b", "c"}, []interface{}{"b", "c"}, "a"},
 	}
 
-	s := xslice.NewSyncSlice(nil)
+	s := xslice.NewSyncSlice()
 	for _, exp := range data {
-		s.Append(exp.in)
+		s.Append(exp.in...)
 		shift := <-s.Shift()
 		if shift != nil && shift.Val != exp.shift {
 			t.Fatalf("%q didn't match %q\n", shift.Val, exp.shift)
@@ -182,9 +182,9 @@ func TestUnShift(t *testing.T) {
 		{[]interface{}{"b", "c"}, []interface{}{"a", "b", "c"}, "a"},
 	}
 
-	s := xslice.NewSyncSlice(nil)
+	s := xslice.NewSyncSlice()
 	for _, exp := range data {
-		s.Append(exp.in)
+		s.Append(exp.in...)
 		s.UnShift(exp.unshift)
 		for item := range s.Iter() {
 			if !reflect.DeepEqual(item.Val, exp.out[item.Idx]) {
@@ -207,9 +207,9 @@ func TestFilter(t *testing.T) {
 		{[]interface{}{"a", "b", "c"}, []interface{}{"b"}, "b"},
 	}
 
-	s := xslice.NewSyncSlice(nil)
+	s := xslice.NewSyncSlice()
 	for _, exp := range data {
-		s.Append(exp.in)
+		s.Append(exp.in...)
 		s.Filter(exp.filter)
 		for item := range s.Iter() {
 			if !reflect.DeepEqual(item.Val, exp.out[item.Idx]) {
@@ -223,7 +223,7 @@ func TestFilter(t *testing.T) {
 func TestContains(t *testing.T) {
 	var ok bool
 
-	s := xslice.NewSyncSlice([]interface{}{"abc", "def"})
+	s := xslice.NewSyncSlice([]interface{}{"abc", "def"}...)
 	ok = s.Contains("abc")
 	assert.Equal(t, ok, true, "did not match")
 }
@@ -237,9 +237,9 @@ func TestReverse(t *testing.T) {
 		{[]interface{}{"a", "b", "c"}, []interface{}{"c", "b", "a"}},
 	}
 
-	s := xslice.NewSyncSlice(nil)
+	s := xslice.NewSyncSlice()
 	for _, exp := range data {
-		s.Append(exp.in)
+		s.Append(exp.in...)
 		s.Reverse()
 		for item := range s.Iter() {
 			if !reflect.DeepEqual(item.Val, exp.out[item.Idx]) {
@@ -259,9 +259,9 @@ func TestContainsAny(t *testing.T) {
 		{[]interface{}{"a", "b", "c"}, []interface{}{"b", "c", "d"}, []interface{}{"b", "c"}},
 	}
 
-	s := xslice.NewSyncSlice(nil)
+	s := xslice.NewSyncSlice()
 	for _, exp := range data {
-		s.Append(exp.src)
+		s.Append(exp.src...)
 		out, ok := s.ContainsAny(exp.tgt)
 		if ok && !reflect.DeepEqual(out, exp.out) {
 			t.Fatalf("%q didn't match %q\n", out, exp.out)
@@ -284,9 +284,9 @@ func TestInsert(t *testing.T) {
 		{[]interface{}{"a", "d"}, []interface{}{"b", "c"}, []interface{}{"a", "b", "c", "d"}, 1},
 	}
 
-	s := xslice.NewSyncSlice(nil)
+	s := xslice.NewSyncSlice()
 	for _, exp := range data {
-		s.Append(exp.in)
+		s.Append(exp.in...)
 		s.Insert(exp.ins, exp.index)
 		for item := range s.Iter() {
 			if !reflect.DeepEqual(item.Val, exp.out[item.Idx]) {
@@ -303,14 +303,14 @@ func TestAppendNotNil(t *testing.T) {
 		in, app, out []interface{}
 	}{
 		{[]interface{}{}, []interface{}{}, []interface{}{}},
-		{[]interface{}{}, []interface{}{"a", ""}, []interface{}{"a"}},
+		{[]interface{}{}, []interface{}{"a", nil}, []interface{}{"a"}},
 		{[]interface{}{"a"}, []interface{}{"b"}, []interface{}{"a", "b"}},
-		{[]interface{}{"b"}, []interface{}{"a", "", "", "c"}, []interface{}{"a", "b", "c"}},
+		{[]interface{}{"b"}, []interface{}{"a", nil, nil, "c"}, []interface{}{"b", "a", "c"}},
 	}
 
-	s := xslice.NewSyncSlice(nil)
+	s := xslice.NewSyncSlice()
 	for _, exp := range data {
-		s.Append(exp.in)
+		s.Append(exp.in...)
 		s.AppendNotNil(exp.app)
 		for item := range s.Iter() {
 			if !reflect.DeepEqual(item.Val, exp.out[item.Idx]) {

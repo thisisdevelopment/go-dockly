@@ -8,7 +8,7 @@ import (
 	"github.com/thisisdevelopment/go-dockly/xslice"
 )
 
-var syncslice = xslice.NewSyncSlice([]interface{}{"one", "two"})
+var syncslice = xslice.NewSyncSlice([]interface{}{"one", "two"}...)
 
 func TestShift(t *testing.T) {
 	var res = <-syncslice.Shift()
