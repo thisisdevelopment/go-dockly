@@ -16,9 +16,13 @@ func (cli *Client) readResponse(b io.ReadCloser, result interface{}) error {
 		return errors.Wrap(err, "reading response failed")
 	}
 
-	err = json.Unmarshal(body, result)
-	if err != nil {
-		return errors.Wrapf(err, "unmarshal response failed: %s", string(body))
+	switch result.(type) {
+	case []byte:
+		result = body
+	default:
+		if err = json.Unmarshal(body, result); err != nil {
+			return errors.Wrapf(err, "unmarshal response failed: %s", string(body))
+		}
 	}
 
 	return nil
