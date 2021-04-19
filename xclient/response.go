@@ -17,7 +17,7 @@ func (cli *Client) readResponse(b io.ReadCloser, result interface{}) error {
 	}
 
 	switch result.(type) {
-	case []byte:
+	case *[]byte:
 		result = body
 	default:
 		if err = json.Unmarshal(body, result); err != nil {
