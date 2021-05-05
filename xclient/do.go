@@ -18,7 +18,7 @@ func (cli *Client) Do(ctx context.Context, method, path string, params, result i
 		url = path
 	}
 
-	cli.log.Debugln("requesting: ", aurora.Yellow(url))
+	cli.log.Debugln(aurora.Cyan(method), aurora.Yellow(url))
 	req, err := cli.assembleRequest(method, url, params)
 	if err != nil {
 		return 0, err

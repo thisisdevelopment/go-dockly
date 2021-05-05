@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
-	"reflect"
 
 	"github.com/pkg/errors"
 )
@@ -16,8 +15,8 @@ func (cli *Client) assembleRequest(method, url string, params interface{}) (*htt
 	var body io.ReadCloser
 	switch params.(type) {
 	case io.ReadCloser:
-		// assign the raw read closer of params to the results interface as is
-		reflect.ValueOf(body).Elem().Set(reflect.ValueOf(params))
+		// assign the raw params as read closer interface to the body as is
+		body = params.(io.ReadCloser)
 	default:
 		b, err := json.Marshal(params)
 		if err != nil {
