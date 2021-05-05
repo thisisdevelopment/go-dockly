@@ -3,8 +3,8 @@ package xclient
 import (
 	"context"
 	"fmt"
-	"io"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/logrusorgru/aurora"
@@ -12,8 +12,11 @@ import (
 	"github.com/pkg/errors"
 )
 
-func (cli *Client) Do(ctx context.Context, method, path string, params io.Reader, result interface{}) (actualStatusCode int, err error) {
-	url := fmt.Sprintf("%s/%s", cli.baseURL, path)
+func (cli *Client) Do(ctx context.Context, method, path string, params, result interface{}) (actualStatusCode int, err error) {
+	var url = fmt.Sprintf("%s/%s", cli.baseURL, path)
+	if strings.Contains(path, "http") {
+		url = path
+	}
 
 	cli.log.Debugln("requesting: ", aurora.Yellow(url))
 	req, err := cli.assembleRequest(method, url, params)

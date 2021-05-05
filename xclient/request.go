@@ -1,6 +1,8 @@
 package xclient
 
 import (
+	"bytes"
+	"encoding/json"
 	"io"
 	"net/http"
 
@@ -9,8 +11,13 @@ import (
 
 // assembleRequest() returns a pointer to a http request instance
 // with method, url and params (if method type post) as inputs
-func (cli *Client) assembleRequest(method, url string, params io.Reader) (*http.Request, error) {
-	req, err := http.NewRequest(method, url, params)
+func (cli *Client) assembleRequest(method, url string, params interface{}) (*http.Request, error) {
+	b, err := json.Marshal(params)
+	if err != nil {
+		return nil, errors.Wrap(err, "json encode dto")
+	}
+
+	req, err := http.NewRequest(method, url, io.NopCloser(bytes.NewReader(b)))
 	if err != nil {
 		return nil, errors.Wrapf(err, "%s request initialization failed for %s", method, url)
 	}
