@@ -21,12 +21,12 @@ func (cli *Client) Do(ctx context.Context, method, path string, params, result i
 	cli.log.Debugln(aurora.Cyan(method), aurora.Yellow(url))
 	req, err := cli.assembleRequest(method, url, params)
 	if err != nil {
-		return 0, err
+		return 0, errors.Wrapf(err, "assemble request %s %s", method, url)
 	}
 
 	err = cli.config.Limiter.Wait(ctx) // blocking call to honor the rate limit
 	if err != nil {
-		return 0, err
+		return 0, errors.Wrapf(err, "rate limiter %s %s", method, url)
 	}
 
 	res, err := cli.http.Do(req.WithContext(ctx))
@@ -45,7 +45,7 @@ func (cli *Client) Do(ctx context.Context, method, path string, params, result i
 	}
 	defer res.Body.Close()
 	if err != nil {
-		return 0, err
+		return 0, errors.Wrapf(err, "%s %s failed", method, url)
 	}
 
 	if cli.config.TrackProgress {
