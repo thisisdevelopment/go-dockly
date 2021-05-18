@@ -46,9 +46,6 @@ func New(log *xlogger.Logger,
 
 	var config *Config
 	if customConfig != nil {
-		if customConfig.Limiter == nil {
-			customConfig.Limiter = defaultRateLimit()
-		}
 		config = customConfig
 	} else {
 		config = GetDefaultConfig()

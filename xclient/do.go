@@ -24,9 +24,11 @@ func (cli *Client) Do(ctx context.Context, method, path string, params, result i
 		return 0, errors.Wrapf(err, "assemble request %s %s", method, url)
 	}
 
-	err = cli.config.Limiter.Wait(ctx) // blocking call to honor the rate limit
-	if err != nil {
-		return 0, errors.Wrapf(err, "rate limiter %s %s", method, url)
+	if cli.config.Limiter != nil {
+		err = cli.config.Limiter.Wait(ctx) // blocking call to honor the rate limit
+		if err != nil {
+			return 0, errors.Wrapf(err, "rate limiter %s %s", method, url)
+		}
 	}
 
 	res, err := cli.http.Do(req.WithContext(ctx))
