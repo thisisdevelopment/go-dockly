@@ -18,11 +18,15 @@ func (cli *Client) assembleRequest(method, url string, params interface{}) (*htt
 		// assign the raw params as read closer interface to the body as is
 		body = params.(io.ReadCloser)
 	default:
-		b, err := json.Marshal(params)
-		if err != nil {
-			return nil, errors.Wrap(err, "json encode dto")
+		if params == nil {
+			body = nil
+		} else {
+			b, err := json.Marshal(params)
+			if err != nil {
+				return nil, errors.Wrap(err, "json encode dto")
+			}
+			body = io.NopCloser(bytes.NewReader(b))
 		}
-		body = io.NopCloser(bytes.NewReader(b))
 	}
 
 	req, err := http.NewRequest(method, url, body)
