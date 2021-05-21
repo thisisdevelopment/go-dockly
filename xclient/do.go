@@ -45,9 +45,12 @@ func (cli *Client) Do(ctx context.Context, method, path string, params, result i
 			}
 		}
 	}
-	defer res.Body.Close()
 	if err != nil {
 		return 0, errors.Wrapf(err, "%s %s failed", method, url)
+	}
+
+	if res.Body != nil {
+		defer res.Body.Close()
 	}
 
 	if cli.config.TrackProgress {
