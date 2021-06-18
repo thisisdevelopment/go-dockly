@@ -43,6 +43,7 @@ func (cli *Client) Do(ctx context.Context, method, path string, params, result i
 			if err != nil {
 				continue
 			}
+			break
 		}
 	}
 	if err != nil {
