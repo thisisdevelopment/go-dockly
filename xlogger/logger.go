@@ -121,6 +121,27 @@ func (l *Logger) Log(log *logrus.Logger) *logrus.Entry {
 	return &logrus.Entry{}
 }
 
+// s.log.WithFields(s.getLogFields("domain", "test" "language", "nl")).Warn("test")
+func (l *Logger) getLogFields(fields ...string) (f logrus.Fields) {
+
+	f = make(logrus.Fields)
+
+	if len(fields)%2 != 0 {
+		l.Warnf("fields should always contain an even amount of elements")
+	}
+
+	for i, v := range fields {
+		// in order of field:value, field:value
+		if i%2 == 1 {
+			continue
+		}
+
+		f[v] = fields[i+1]
+	}
+
+	return f
+}
+
 // WithField proxy method
 func (l *Logger) WithField(key string, value interface{}) *logrus.Entry {
 	return l.Log(l.log).WithField(key, value)
