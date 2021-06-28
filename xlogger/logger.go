@@ -121,8 +121,8 @@ func (l *Logger) Log(log *logrus.Logger) *logrus.Entry {
 	return &logrus.Entry{}
 }
 
-// s.log.WithFields(s.log.toFields("domain", "test" "language", "nl")).Warn("test")
-func (l *Logger) toFields(fields ...string) (f logrus.Fields) {
+// s.log.WithFields(s.log.ToFields("domain", "test" "language", "nl")).Warn("test")
+func (l *Logger) ToFields(fields ...string) (f logrus.Fields) {
 
 	f = make(logrus.Fields)
 
