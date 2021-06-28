@@ -14,7 +14,7 @@ import (
 
 func (cli *Client) Do(ctx context.Context, method, path string, params, result interface{}) (actualStatusCode int, err error) {
 	var url = fmt.Sprintf("%s/%s", cli.baseURL, path)
-	if strings.Contains(path, "http") {
+	if strings.HasPrefix(path, "http") {
 		url = path
 	}
 
@@ -33,6 +33,7 @@ func (cli *Client) Do(ctx context.Context, method, path string, params, result i
 
 	res, err := cli.http.Do(req.WithContext(ctx))
 	if err != nil {
+		cli.log.Debugf("error in backoff request: %s", err.Error())
 		for i := 0; i < cli.config.MaxRetry; i++ {
 			err = cli.handleBackoff(i)
 			if err != nil {
@@ -41,6 +42,7 @@ func (cli *Client) Do(ctx context.Context, method, path string, params, result i
 			}
 			res, err = cli.http.Do(req)
 			if err != nil {
+				cli.log.Debugf("error in backoff request: %s", err.Error())
 				continue
 			}
 			break
