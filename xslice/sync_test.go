@@ -8,7 +8,7 @@ import (
 	"github.com/thisisdevelopment/go-dockly/xslice"
 )
 
-func TestUniq(t *testing.T) {
+func TestSyncUniq(t *testing.T) {
 
 	data := []struct{ in, out []interface{} }{
 		{[]interface{}{}, []interface{}{}},
@@ -34,7 +34,7 @@ func TestUniq(t *testing.T) {
 	}
 }
 
-func TestCut(t *testing.T) {
+func TestSyncCut(t *testing.T) {
 
 	data := []struct {
 		in, out    []interface{}
@@ -64,7 +64,7 @@ func TestCut(t *testing.T) {
 	}
 }
 
-func TestStrip(t *testing.T) {
+func TestSyncStrip(t *testing.T) {
 
 	data := []struct {
 		in, out []interface{}
@@ -90,7 +90,7 @@ func TestStrip(t *testing.T) {
 	}
 }
 
-func TestDel(t *testing.T) {
+func TestSyncDel(t *testing.T) {
 
 	data := []struct {
 		in, out []interface{}
@@ -116,7 +116,7 @@ func TestDel(t *testing.T) {
 	}
 }
 
-func TestPop(t *testing.T) {
+func TestSyncPop(t *testing.T) {
 
 	data := []struct {
 		in, out []interface{}
@@ -143,7 +143,7 @@ func TestPop(t *testing.T) {
 	}
 }
 
-func TestShift(t *testing.T) {
+func TestSyncShift(t *testing.T) {
 
 	data := []struct {
 		in, out []interface{}
@@ -171,7 +171,7 @@ func TestShift(t *testing.T) {
 	}
 }
 
-func TestUnShift(t *testing.T) {
+func TestSyncUnShift(t *testing.T) {
 
 	data := []struct {
 		in, out []interface{}
@@ -195,7 +195,7 @@ func TestUnShift(t *testing.T) {
 	}
 }
 
-func TestFilter(t *testing.T) {
+func TestSyncFilter(t *testing.T) {
 
 	data := []struct {
 		in, out []interface{}
@@ -220,7 +220,7 @@ func TestFilter(t *testing.T) {
 	}
 }
 
-func TestContains(t *testing.T) {
+func TestSyncContains(t *testing.T) {
 	var ok bool
 
 	s := xslice.NewSyncSlice([]interface{}{"abc", "def"}...)
@@ -228,7 +228,7 @@ func TestContains(t *testing.T) {
 	assert.Equal(t, ok, true, "did not match")
 }
 
-func TestReverse(t *testing.T) {
+func TestSyncReverse(t *testing.T) {
 
 	data := []struct{ in, out []interface{} }{
 		{[]interface{}{}, []interface{}{}},
@@ -250,7 +250,7 @@ func TestReverse(t *testing.T) {
 	}
 }
 
-func TestContainsAny(t *testing.T) {
+func TestSyncContainsAny(t *testing.T) {
 
 	data := []struct{ src, tgt, out []interface{} }{
 		{[]interface{}{}, []interface{}{}, []interface{}{}},
@@ -270,7 +270,7 @@ func TestContainsAny(t *testing.T) {
 	}
 }
 
-func TestInsert(t *testing.T) {
+func TestSyncInsert(t *testing.T) {
 
 	data := []struct {
 		in, ins, out []interface{}
