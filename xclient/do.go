@@ -20,6 +20,7 @@ func (cli *Client) Do(ctx context.Context, method, path string, params, result i
 
 	cli.log.Debugln(aurora.Cyan(method), aurora.Yellow(url))
 	req, err := cli.assembleRequest(method, url, params)
+	req.Close = !cli.config.RecycleConnection
 	if err != nil {
 		return 0, errors.Wrapf(err, "assemble request %s %s", method, url)
 	}

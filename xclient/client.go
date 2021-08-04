@@ -25,13 +25,14 @@ type Client struct {
 
 // Config defines the config properties of the package
 type Config struct {
-	CustomHeader  map[string]string
-	ContentFormat string
-	TrackProgress bool
-	Limiter       *rate.Limiter // nil here will use default rate limit
-	MaxRetry      int
-	WaitMin       time.Duration
-	WaitMax       time.Duration
+	CustomHeader      map[string]string
+	ContentFormat     string
+	TrackProgress     bool
+	RecycleConnection bool
+	Limiter           *rate.Limiter // nil here will use default rate limit
+	MaxRetry          int
+	WaitMin           time.Duration
+	WaitMax           time.Duration
 }
 
 // New returns an initiliazed API client
