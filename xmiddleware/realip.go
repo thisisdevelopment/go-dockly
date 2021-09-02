@@ -42,17 +42,17 @@ func RealIP(h http.Handler) http.Handler {
 func realIP(r *http.Request) string {
 	var ip string
 
-	// https://docs.aws.amazon.com/elasticloadbalancing/latest/classic/x-forwarded-headers.html
-	if xff := r.Header.Get(xForwardedFor); xff != "" {
+	if xcip := r.Header.Get(xClientIP); xcip != "" {
+		// different proxies set different headers
+		ip = xcip
+	} else if xff := r.Header.Get(xForwardedFor); xff != "" {
+		// https://docs.aws.amazon.com/elasticloadbalancing/latest/classic/x-forwarded-headers.html
 		// in case a transmission chain is encoded in x-forwarded-for to get the origin ip on the first position (fifo)
 		i := strings.Index(xff, ", ")
 		if i == -1 {
 			i = len(xff)
 		}
 		ip = xff[:i]
-	} else if xcip := r.Header.Get(xClientIP); xcip != "" {
-		// different proxies set different headers
-		ip = xcip
 	} else if xrip := r.Header.Get(xRealIP); xrip != "" {
 		ip = xrip
 	}
