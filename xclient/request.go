@@ -3,7 +3,6 @@ package xclient
 import (
 	"bytes"
 	"encoding/json"
-	"io"
 	"net/http"
 
 	"github.com/pkg/errors"
@@ -12,11 +11,11 @@ import (
 // assembleRequest() returns a pointer to a http request instance
 // with method, url and params (if method type post) as inputs
 func (cli *Client) assembleRequest(method, url string, params interface{}) (*http.Request, error) {
-	var body io.ReadCloser
+	var body = new(bytes.Reader)
 	switch params.(type) {
-	case io.ReadCloser:
+	case bytes.Reader:
 		// assign the raw params as read closer interface to the body as is
-		body = params.(io.ReadCloser)
+		body = params.(*bytes.Reader)
 	default:
 		if params == nil {
 			body = nil
@@ -25,7 +24,7 @@ func (cli *Client) assembleRequest(method, url string, params interface{}) (*htt
 			if err != nil {
 				return nil, errors.Wrap(err, "json encode dto")
 			}
-			body = io.NopCloser(bytes.NewReader(b))
+			body = bytes.NewReader(b)
 		}
 	}
 
