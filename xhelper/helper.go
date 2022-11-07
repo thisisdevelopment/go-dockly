@@ -2,7 +2,7 @@ package xhelper
 
 import (
 	"github.com/stretchr/testify/suite"
-	"github.com/thisisdevelopment/go-dockly/xlogger"
+	"github.com/thisisdevelopment/go-dockly/v2/xlogger"
 )
 
 // Helper for testify suite

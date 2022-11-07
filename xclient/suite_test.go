@@ -3,11 +3,11 @@ package xclient_test
 import (
 	"testing"
 
-	"github.com/thisisdevelopment/go-dockly/xclient"
-	"github.com/thisisdevelopment/go-dockly/xhelper"
-	"github.com/thisisdevelopment/go-dockly/xlogger"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
+	"github.com/thisisdevelopment/go-dockly/v2/xclient"
+	"github.com/thisisdevelopment/go-dockly/v2/xhelper"
+	"github.com/thisisdevelopment/go-dockly/v2/xlogger"
 )
 
 type TestSuite struct {

@@ -15,8 +15,7 @@ require (
 	github.com/seatgeek/logrus-gelf-formatter v0.0.0-20210414080842-5b05eb8ff761
 	github.com/sirupsen/logrus v1.8.1
 	github.com/stretchr/testify v1.7.0
-	github.com/thisisdevelopment/go-dockly v1.1.5
-	golang.org/x/net v0.1.0
+	golang.org/x/net v0.0.0-20210119194325-5f4716e94777
 	golang.org/x/time v0.0.0-20201208040808-7e3f01d25324
 	gopkg.in/h2non/gock.v1 v1.0.15
 	gopkg.in/yaml.v2 v2.4.0

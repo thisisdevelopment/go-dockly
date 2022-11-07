@@ -3,8 +3,8 @@ package xredis_test
 import (
 	"testing"
 
-	"github.com/thisisdevelopment/go-dockly/xhelper"
-	"github.com/thisisdevelopment/go-dockly/xlogger"
+	"github.com/thisisdevelopment/go-dockly/v2/xhelper"
+	"github.com/thisisdevelopment/go-dockly/v2/xlogger"
 
 	"github.com/stretchr/testify/suite"
 )

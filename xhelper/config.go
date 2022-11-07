@@ -4,7 +4,7 @@ import (
 	"strings"
 
 	"github.com/pelletier/go-toml"
-	"github.com/thisisdevelopment/go-dockly/xlogger"
+	"github.com/thisisdevelopment/go-dockly/v2/xlogger"
 	"gopkg.in/yaml.v2"
 )
 

@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-	"github.com/thisisdevelopment/go-dockly/xlogger"
+	"github.com/thisisdevelopment/go-dockly/v2/xlogger"
 	"golang.org/x/time/rate"
 )
 

@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/thisisdevelopment/go-dockly/xslice"
+	"github.com/thisisdevelopment/go-dockly/v2/xslice"
 )
 
 func TestUniq(t *testing.T) {

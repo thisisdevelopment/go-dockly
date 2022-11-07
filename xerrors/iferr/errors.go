@@ -6,8 +6,8 @@ import (
 	"reflect"
 
 	"github.com/logrusorgru/aurora"
-	errors "github.com/thisisdevelopment/go-dockly/xerrors"
-	"github.com/thisisdevelopment/go-dockly/xlogger"
+	errors "github.com/thisisdevelopment/go-dockly/v2/xerrors"
+	"github.com/thisisdevelopment/go-dockly/v2/xlogger"
 
 	"github.com/imdario/mergo"
 )

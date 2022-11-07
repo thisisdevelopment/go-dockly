@@ -5,7 +5,7 @@ import (
 
 	"github.com/davecgh/go-spew/spew"
 	"github.com/stretchr/testify/assert"
-	"github.com/thisisdevelopment/go-dockly/xslice"
+	"github.com/thisisdevelopment/go-dockly/v2/xslice"
 )
 
 var syncslice = xslice.NewSyncSlice([]interface{}{"one", "two"}...)
