@@ -22,13 +22,13 @@ func init() {
 	})
 
 	if err != nil {
-		log.Error("Failed to initialize the default IfErr %+v\n", err)
+		log.Errorf("Failed to initialize the default IfErr %+v\n", err)
 	}
 
 	Default, err = New(WithLogger(log))
 
 	if err != nil {
-		log.Error("Failed to initialize the default IfErr %+v\n", err)
+		log.Errorf("Failed to initialize the default IfErr %+v\n", err)
 	}
 }
 

@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"strconv"
 )
@@ -37,7 +36,7 @@ func ExtractParam(key string, r *http.Request) (value string, err error) {
 }
 
 func ExtractBody(body io.ReadCloser, expected interface{}) error {
-	b, err := ioutil.ReadAll(body)
+	b, err := io.ReadAll(body)
 	if err != nil {
 		return err
 	}

@@ -11,7 +11,7 @@ import (
 // assembleRequest() returns a pointer to a http request instance
 // with method, url and params (if method type post) as inputs
 func (cli *Client) assembleRequest(method, url string, params interface{}) (*http.Request, error) {
-	var body = new(bytes.Reader)
+	var body *bytes.Reader
 	switch params.(type) {
 	case bytes.Reader:
 		// assign the raw params as read closer interface to the body as is

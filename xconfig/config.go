@@ -1,7 +1,7 @@
 package xconfig
 
 import (
-	"io/ioutil"
+	"os"
 	"strings"
 
 	"github.com/BurntSushi/toml"
@@ -11,7 +11,7 @@ import (
 
 // LoadConfig reads in a toml file and inits the ServiceConfig
 func LoadConfig(cfg interface{}, path string) error {
-	bytes, err := ioutil.ReadFile(path)
+	bytes, err := os.ReadFile(path)
 
 	if err != nil {
 		return errors.Wrapf(err, "unable to read file %s", path)
