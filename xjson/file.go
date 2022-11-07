@@ -2,7 +2,7 @@ package xjson
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"os"
 
 	"github.com/pkg/errors"
@@ -17,7 +17,7 @@ func Load(path string, v interface{}) error {
 	}
 	defer afile.Close()
 
-	abytes, err := ioutil.ReadAll(afile)
+	abytes, err := io.ReadAll(afile)
 	if err != nil {
 		return errors.Wrapf(err, "reading %s failed", path)
 	}
@@ -37,7 +37,7 @@ func Write(path string, toWrite interface{}) error {
 		return errors.Wrapf(err, "marshalling %s failed", path)
 	}
 
-	err = ioutil.WriteFile(path, file, 0644)
+	err = os.WriteFile(path, file, 0644)
 	if err != nil {
 		return errors.Wrapf(err, "writing %s failed", path)
 	}

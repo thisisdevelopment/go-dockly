@@ -1,11 +1,9 @@
 package xhelper
 
-import (
-	"io/ioutil"
-)
+import "os"
 
 func (h *Helper) BytesFromFile(path string) []byte {
-	bytes, err := ioutil.ReadFile(path)
+	bytes, err := os.ReadFile(path)
 
 	h.suite.Require().NoError(err)
 

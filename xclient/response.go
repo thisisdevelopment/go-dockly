@@ -3,7 +3,6 @@ package xclient
 import (
 	"encoding/json"
 	"io"
-	"io/ioutil"
 	"reflect"
 
 	"github.com/pkg/errors"
@@ -12,7 +11,7 @@ import (
 // readResponse() will try to unmarshal the response body into the
 // desired result interface or return an error
 func (cli *Client) readResponse(b io.ReadCloser, result interface{}) error {
-	body, err := ioutil.ReadAll(b)
+	body, err := io.ReadAll(b)
 	if err != nil {
 		return errors.Wrap(err, "reading response failed")
 	}

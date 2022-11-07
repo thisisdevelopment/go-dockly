@@ -19,12 +19,12 @@ func (c *Redis) Set(ctx context.Context, key string, value interface{}, t time.D
 		t = time.Duration(c.config.Expiration) * time.Minute
 	}
 
-	switch value.(type) {
+	switch v := value.(type) {
 	// if set value is byte slice it is assumed you know what you do
 	// as in the value is already marshalled from some format eg yaml
 	case []byte:
 		// gzipped storing in redis yields x10 size reduction
-		g, err = c.gzip(value.([]byte))
+		g, err = c.gzip(v)
 		if err != nil {
 			return errors.Wrapf(err, "gzip byte %s", aurora.Yellow(key))
 		}

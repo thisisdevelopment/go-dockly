@@ -145,7 +145,6 @@ func (s *SyncSlice) UnShift(v interface{}) {
 	defer s.Unlock()
 
 	s.items = append([]interface{}{v}, s.items...)
-	return
 }
 
 // Filter ing without allocating
@@ -237,9 +236,7 @@ func (s *SyncSlice) Append(items ...interface{}) {
 	s.Lock()
 	defer s.Unlock()
 
-	for _, v := range items {
-		s.items = append(s.items, v)
-	}
+	s.items = append(s.items, items...)
 }
 
 // Clear s all elements from the slice
