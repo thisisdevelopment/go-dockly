@@ -12,8 +12,31 @@ import (
 	"github.com/pkg/errors"
 )
 
+// Do sends an HTTP request to the API endpoint and decodes the response body into the specified value.
+// If the response is an error, it will be decoded as well.
+// If the context is canceled or times out, the request will be aborted.
+// If the response has a non-200 status code, an error will be returned.
+// If the result parameter is nil, the response body will be discarded.
+//
+// The base URL for the request is determined based on the Client's configuration.
+// To make a request to a different URL, use the full URL as the path parameter.
+//
+// The request will be retried up to the configured number of times if the request fails due to a temporary error.
+// The retry policy will be applied after the backoff delay, so each retry will be delayed for a longer period of time.
+//
+// The request will be tracked for progress if the Client's TrackProgress option is set to true.
+// The progress tracking will be done using the provided context, so the request will be canceled if the context is canceled.
+// The Content-Length header of the response will be used to determine the size of the response body,
+// and the progress will be updated every second.
+//
+// The request will be rate limited if the Client's Limiter option is set.
+// The request will be blocked until the limit is available, or the context is canceled.
+//
+// The request method, URL, and any parameters will be logged using the Client's Logger.
+//
+// This function is intended to be used by the generated clients, and should not be called directly by the user.
 func (cli *Client) Do(ctx context.Context, method, path string, params, result interface{}) (actualStatusCode int, err error) {
-	var url = fmt.Sprintf("%s/%s", cli.baseURL, path)
+	url := fmt.Sprintf("%s/%s", cli.baseURL, path)
 	if strings.HasPrefix(path, "http") {
 		url = path
 	}
@@ -46,9 +69,13 @@ func (cli *Client) Do(ctx context.Context, method, path string, params, result i
 				cli.log.Debugf("error in backoff request: %s", err.Error())
 				continue
 			}
+			defer res.Body.Close()
 			break
 		}
 	}
+
+	defer res.Body.Close()
+
 	if err != nil {
 		return 0, errors.Wrapf(err, "%s %s failed", method, url)
 	}
@@ -58,7 +85,7 @@ func (cli *Client) Do(ctx context.Context, method, path string, params, result i
 	}
 
 	if cli.config.TrackProgress {
-		var contentLengthHeader = res.Header.Get("Content-Length")
+		contentLengthHeader := res.Header.Get("Content-Length")
 		if contentLengthHeader == "" {
 			return res.StatusCode, errors.New("cannot determine progress without Content-Length")
 		}
@@ -68,9 +95,9 @@ func (cli *Client) Do(ctx context.Context, method, path string, params, result i
 			return res.StatusCode, errors.Wrapf(err, "bad content-length %q", contentLengthHeader)
 		}
 
-		var r = progress.NewReader(res.Body)
+		r := progress.NewReader(res.Body)
 		go func() {
-			var progressChan = progress.NewTicker(ctx, r, size, 1*time.Second)
+			progressChan := progress.NewTicker(ctx, r, size, 1*time.Second)
 
 			for p := range progressChan {
 				cli.log.Printf("%v remaining...", p.Remaining().Round(time.Second))

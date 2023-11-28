@@ -18,7 +18,7 @@ func (cli *Client) assembleRequest(method, url string, params interface{}) (*htt
 		body = params.(*bytes.Reader)
 	default:
 		if params == nil {
-			body = nil
+			body = bytes.NewReader(nil)
 		} else {
 			b, err := json.Marshal(params)
 			if err != nil {
