@@ -198,6 +198,15 @@ func (l *Logger) AddHook(hook logrus.Hook) {
 	l.log.Hooks.Add(hook)
 }
 
+func (l *Logger) AddHook2(hook logrus.Hook) {
+	l.log.Hooks.Add(hook)
+	l.errLog.Hooks.Add(hook)
+}
+
+func (l *Logger) AddErrHook(hook logrus.Hook) {
+	l.errLog.Hooks.Add(hook)
+}
+
 func (l *Logger) Dump(v ...interface{}) {
 	spew.Dump(v...)
 	l.Log(l.log).Info(aurora.Yellow("^^^dump^^^"))
