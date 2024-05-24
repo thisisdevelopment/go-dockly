@@ -1,5 +1,6 @@
 github.com/BurntSushi/toml v1.3.2 h1:o7IhLm0Msx3BaB+n3Ag7L8EVlByGnpq14C4YWiu/gL8=
 github.com/BurntSushi/toml v1.3.2/go.mod h1:CxXYINrC8qIiEnFrOxCa7Jy5BFHlXnUU2pbicEuybxQ=
+github.com/bitly/go-simplejson v0.5.1 h1:xgwPbetQScXt1gh9BmoJ6j9JMr3TElvuIyjR8pgdoow=
 github.com/bitly/go-simplejson v0.5.1/go.mod h1:YOPVLzCfwK14b4Sff3oP1AmGhI9T9Vsg84etUnlyp+Q=
 github.com/bugsnag/bugsnag-go/v2 v2.3.0 h1:R97TPfwPmdTRJ4q6kXsTEHV23tNk99BtDgX6IoyLcJE=
 github.com/bugsnag/bugsnag-go/v2 v2.3.0/go.mod h1:S9njhE7l6XCiKycOZ2zp0x1zoEE5nL3HjROCSsKc/3c=
