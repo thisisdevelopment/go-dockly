@@ -33,14 +33,15 @@ type Config struct {
 	MaxRetry          int
 	WaitMin           time.Duration
 	WaitMax           time.Duration
+	UseJsoniter       bool
 }
 
 // New returns an initiliazed API client
 func New(log *xlogger.Logger,
 	baseURL string,
 	customHTTP *http.Client,
-	customConfig *Config) (IAPIClient, error) {
-
+	customConfig *Config,
+) (IAPIClient, error) {
 	if baseURL == "" {
 		return nil, errors.New("api needs a base URL")
 	}

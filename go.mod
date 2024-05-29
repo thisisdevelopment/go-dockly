@@ -9,6 +9,7 @@ require (
 	github.com/go-chi/chi/v5 v5.0.10
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/imdario/mergo v0.3.16
+	github.com/json-iterator/go v1.1.12
 	github.com/logrusorgru/aurora v2.0.3+incompatible
 	github.com/machinebox/progress v0.2.0
 	github.com/pelletier/go-toml v1.9.5
@@ -31,6 +32,8 @@ require (
 	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0 // indirect
 	github.com/kr/pretty v0.1.0 // indirect
 	github.com/matryer/is v1.4.0 // indirect
+	github.com/modern-go/concurrent v0.0.0-20180228061459-e0a39a4cb421 // indirect
+	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	golang.org/x/sys v0.14.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect

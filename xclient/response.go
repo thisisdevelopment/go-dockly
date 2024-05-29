@@ -5,6 +5,7 @@ import (
 	"io"
 	"reflect"
 
+	jsoniter "github.com/json-iterator/go"
 	"github.com/pkg/errors"
 )
 
@@ -21,9 +22,16 @@ func (cli *Client) readResponse(b io.ReadCloser, result interface{}) error {
 		// assign the raw byte slice of body to the results interface as is
 		reflect.ValueOf(result).Elem().Set(reflect.ValueOf(body))
 	default:
-		if err = json.Unmarshal(body, result); err != nil {
-			return errors.Wrapf(err, "unmarshal response failed: %s", string(body))
+		if cli.config.UseJsoniter {
+			if err = jsoniter.ConfigCompatibleWithStandardLibrary.Unmarshal(body, result); err != nil {
+				return errors.Wrapf(err, "unmarshal response failed: %s", string(body))
+			}
+		} else {
+			if err = json.Unmarshal(body, result); err != nil {
+				return errors.Wrapf(err, "unmarshal response failed: %s", string(body))
+			}
 		}
+
 	}
 
 	return nil
