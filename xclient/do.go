@@ -57,8 +57,10 @@ func (cli *Client) Do(ctx context.Context, method, path string, params, result i
 
 	res, err := cli.http.Do(req.WithContext(ctx))
 	if err != nil {
-		if err := res.Body.Close(); err != nil {
-			cli.log.WithError(err).Error("failed to close response body")
+		if res != nil {
+			if err := res.Body.Close(); err != nil {
+				cli.log.WithError(err).Error("failed to close response body")
+			}
 		}
 		cli.log.Debugf("error in backoff request: %s", err.Error())
 		for i := 0; i < cli.config.MaxRetry; i++ {
