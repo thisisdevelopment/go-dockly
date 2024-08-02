@@ -3,6 +3,7 @@ package xclient
 import (
 	"context"
 	"fmt"
+	"io"
 	"strconv"
 	"strings"
 	"time"
@@ -57,37 +58,40 @@ func (cli *Client) Do(ctx context.Context, method, path string, params, result i
 
 	res, err := cli.http.Do(req.WithContext(ctx))
 	if err != nil {
-		if res != nil {
-			if err := res.Body.Close(); err != nil {
-				cli.log.WithError(err).Error("failed to close response body")
-			}
-		}
+		// REMARK (official docs): On error, any Response can be ignored. A non-nil Response with a non-nil error only occurs when CheckRedirect fails,
+		// and even then the returned Response.Body is already closed.
+
 		cli.log.Debugf("error in backoff request: %s", err.Error())
+
 		for i := 0; i < cli.config.MaxRetry; i++ {
 			err = cli.handleBackoff(i)
 			if err != nil {
 				err = errors.Wrapf(err, "%d backoff exhausted", i)
 				break
 			}
+
 			res, err = cli.http.Do(req)
 			if err != nil {
 				cli.log.Debugf("error in backoff request: %s", err.Error())
 				continue
 			}
-			defer res.Body.Close()
+
 			break
 		}
 	}
 
-	defer res.Body.Close()
-
+	// check for error again after possible retries
 	if err != nil {
 		return 0, errors.Wrapf(err, "%s %s failed", method, url)
 	}
 
-	if res.Body != nil {
-		defer res.Body.Close()
-	}
+	defer func() {
+		// make sure we read everything even if we do nothing with the
+		// see discussion: https://www.reddit.com/r/golang/comments/13fphyz/til_go_response_body_must_be_closed_even_if_you/
+		_, _ = io.Copy(io.Discard, res.Body)
+		// close the body, Body is guaranteed to be there even if the response does not have return data (see docs)
+		_ = res.Body.Close()
+	}()
 
 	if cli.config.TrackProgress {
 		contentLengthHeader := res.Header.Get("Content-Length")
@@ -110,7 +114,7 @@ func (cli *Client) Do(ctx context.Context, method, path string, params, result i
 		}()
 	}
 
-	// 	check for nil in case we are not interested in the response body
+	// check for nil in case we are not interested in the response body
 	if result != nil {
 		err = cli.readResponse(res.Body, result)
 	}
