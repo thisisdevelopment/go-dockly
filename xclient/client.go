@@ -12,7 +12,7 @@ import (
 
 // IAPIClient interface definition
 type IAPIClient interface {
-	Do(ctx context.Context, method, path string, params, result interface{}) (actualStatusCode int, err error)
+	Do(ctx context.Context, method, path string, params any, header map[string]string, result any) (actualStatusCode int, err error)
 }
 
 // Client defines the class implementation for this package

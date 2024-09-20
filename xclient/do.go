@@ -36,14 +36,14 @@ import (
 // The request method, URL, and any parameters will be logged using the Client's Logger.
 //
 // This function is intended to be used by the generated clients, and should not be called directly by the user.
-func (cli *Client) Do(ctx context.Context, method, path string, params, result interface{}) (actualStatusCode int, err error) {
+func (cli *Client) Do(ctx context.Context, method, path string, params any, header map[string]string, result any) (actualStatusCode int, err error) {
 	url := fmt.Sprintf("%s/%s", cli.baseURL, path)
 	if strings.HasPrefix(path, "http") {
 		url = path
 	}
 
 	cli.log.Debugln(aurora.Cyan(method), aurora.Yellow(url))
-	req, err := cli.assembleRequest(method, url, params)
+	req, err := cli.assembleRequest(method, url, params, header)
 	req.Close = !cli.config.RecycleConnection
 	if err != nil {
 		return 0, errors.Wrapf(err, "assemble request %s %s", method, url)
