@@ -3,14 +3,15 @@ package xconfig
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/BurntSushi/toml"
-	"gopkg.in/yaml.v3"
 	"os"
 	"path"
+
+	"github.com/BurntSushi/toml"
+	"gopkg.in/yaml.v3"
 )
 
 // LoadConfig reads in a toml file and inits the ServiceConfig
-func LoadConfig(cfg any, filePath string) error {
+func LoadConfig(filePath string, cfg any) error {
 	bytes, err := os.ReadFile(filePath)
 
 	if err != nil {
@@ -36,8 +37,8 @@ func LoadConfig(cfg any, filePath string) error {
 }
 
 // MustConfig load config and panic if fails
-func MustConfig(cfg any, filePath string) {
-	err := LoadConfig(cfg, filePath)
+func MustConfig(filePath string, cfg any) {
+	err := LoadConfig(filePath, cfg)
 	if err != nil {
 		panic(err)
 	}

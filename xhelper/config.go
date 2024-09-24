@@ -15,5 +15,5 @@ func (h *Helper) GetLogger() *xlogger.Logger {
 
 // GetConfig returns the config.ServiceConfig
 func (h *Helper) GetConfig(path string, cfg interface{}) {
-	h.suite.Require().NoError(xconfig.LoadConfig(cfg, path))
+	h.suite.Require().NoError(xconfig.LoadConfig(path, cfg))
 }

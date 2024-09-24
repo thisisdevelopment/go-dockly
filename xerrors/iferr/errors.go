@@ -5,11 +5,10 @@ import (
 	"os"
 	"reflect"
 
+	"dario.cat/mergo"
 	"github.com/logrusorgru/aurora"
 	errors "github.com/thisisdevelopment/go-dockly/v2/xerrors"
 	"github.com/thisisdevelopment/go-dockly/v2/xlogger"
-
-	"github.com/imdario/mergo"
 )
 
 var Default *IfErr
