@@ -1,11 +1,8 @@
 package xhelper
 
 import (
-	"strings"
-
-	"github.com/pelletier/go-toml"
+	"github.com/thisisdevelopment/go-dockly/v2/xconfig"
 	"github.com/thisisdevelopment/go-dockly/v2/xlogger"
-	"gopkg.in/yaml.v2"
 )
 
 // GetLogger returns the application default logger
@@ -18,14 +15,5 @@ func (h *Helper) GetLogger() *xlogger.Logger {
 
 // GetConfig returns the config.ServiceConfig
 func (h *Helper) GetConfig(path string, cfg interface{}) {
-	var err error
-	b := h.BytesFromFile(path)
-
-	switch true {
-	case strings.Contains(path, "toml"):
-		err = toml.Unmarshal(b, cfg)
-	case strings.Contains(path, "yaml") || strings.Contains(path, "yml"):
-		err = yaml.Unmarshal(b, cfg)
-	}
-	h.suite.Require().NoError(err)
+	h.suite.Require().NoError(xconfig.LoadConfig(cfg, path))
 }

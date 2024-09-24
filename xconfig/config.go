@@ -1,32 +1,44 @@
 package xconfig
 
 import (
-	"os"
-	"strings"
-
+	"encoding/json"
+	"fmt"
 	"github.com/BurntSushi/toml"
-	"github.com/pkg/errors"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
+	"os"
+	"path"
 )
 
 // LoadConfig reads in a toml file and inits the ServiceConfig
-func LoadConfig(cfg interface{}, path string) error {
-	bytes, err := os.ReadFile(path)
+func LoadConfig(cfg any, filePath string) error {
+	bytes, err := os.ReadFile(filePath)
 
 	if err != nil {
-		return errors.Wrapf(err, "unable to read file %s", path)
+		return fmt.Errorf("unable to read file %s: %w", filePath, err)
 	}
 
-	switch true {
-	case strings.Contains(path, "toml"):
+	switch path.Ext(filePath) {
+	case ".toml":
 		err = toml.Unmarshal(bytes, cfg)
-	case strings.Contains(path, "yaml") || strings.Contains(path, "yml"):
+	case ".yaml":
+		fallthrough
+	case ".yml":
 		err = yaml.Unmarshal(bytes, cfg)
+	case ".json":
+		err = json.Unmarshal(bytes, cfg)
 	}
 
 	if err != nil {
-		return errors.Wrapf(err, "error while parsing config file %s", string(bytes))
+		return fmt.Errorf("error while parsing config file %s: %w", string(bytes), err)
 	}
 
 	return nil
+}
+
+// MustConfig load config and panic if fails
+func MustConfig(cfg any, filePath string) {
+	err := LoadConfig(cfg, filePath)
+	if err != nil {
+		panic(err)
+	}
 }
