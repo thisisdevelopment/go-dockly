@@ -93,6 +93,8 @@ func (cli *Client) Do(ctx context.Context, method, path string, params any, head
 		_ = res.Body.Close()
 	}()
 
+	var bodyReader io.Reader = res.Body
+
 	if cli.config.TrackProgress {
 		contentLengthHeader := res.Header.Get("Content-Length")
 		if contentLengthHeader == "" {
@@ -104,9 +106,10 @@ func (cli *Client) Do(ctx context.Context, method, path string, params any, head
 			return res.StatusCode, errors.Wrapf(err, "bad content-length %q", contentLengthHeader)
 		}
 
-		r := progress.NewReader(res.Body)
+		// wrap reader in progress reader that implements counter interface
+		bodyReader = progress.NewReader(bodyReader)
 		go func() {
-			progressChan := progress.NewTicker(ctx, r, size, 1*time.Second)
+			progressChan := progress.NewTicker(ctx, bodyReader.(progress.Counter), size, 1*time.Second)
 
 			for p := range progressChan {
 				cli.log.Printf("%v remaining...", p.Remaining().Round(time.Second))
@@ -116,7 +119,7 @@ func (cli *Client) Do(ctx context.Context, method, path string, params any, head
 
 	// check for nil in case we are not interested in the response body
 	if result != nil {
-		err = cli.readResponse(res.Body, result)
+		err = cli.readResponse(bodyReader, result)
 	}
 
 	return res.StatusCode, err

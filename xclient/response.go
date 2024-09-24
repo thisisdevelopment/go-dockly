@@ -11,7 +11,7 @@ import (
 
 // readResponse() will try to unmarshal the response body into the
 // desired result interface or return an error
-func (cli *Client) readResponse(b io.ReadCloser, result interface{}) error {
+func (cli *Client) readResponse(b io.Reader, result interface{}) error {
 	body, err := io.ReadAll(b)
 	if err != nil {
 		return errors.Wrap(err, "reading response failed")

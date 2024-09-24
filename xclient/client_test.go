@@ -3,12 +3,11 @@ package xclient_test
 import (
 	"bytes"
 	"encoding/json"
-	"io"
-	"net/http"
-
 	"github.com/stretchr/testify/require"
 	"golang.org/x/net/context"
 	"gopkg.in/h2non/gock.v1"
+	"io"
+	"net/http"
 )
 
 const (
@@ -28,7 +27,7 @@ func (s *TestSuite) Test_Client_Get() {
 		Reply(expectedStatus).
 		JSON(expected)
 
-	actualStatus, err := s.client.Do(context.Background(), "GET", expectedPath, nil, &result)
+	actualStatus, err := s.client.Do(context.Background(), "GET", expectedPath, nil, nil, &result)
 	require.NoError(s.T(), err)
 	require.NotNil(s.T(), result)
 	require.Equal(s.T(), expected, result)
@@ -39,13 +38,12 @@ func (s *TestSuite) Test_Client_Get() {
 }
 
 func (s *TestSuite) Test_Client_Post() {
-
 	gock.New(s.baseURL).
 		Post(expectedPath).
 		Reply(expectedStatus).
 		JSON(expected)
 
-	actualStatus, err := s.client.Do(context.Background(), "POST", expectedPath, expected, &result)
+	actualStatus, err := s.client.Do(context.Background(), "POST", expectedPath, expected, nil, &result)
 	require.NoError(s.T(), err)
 	require.NotNil(s.T(), result)
 	require.Equal(s.T(), expected, result)
@@ -64,7 +62,7 @@ func (s *TestSuite) Test_Client_Post_Reader() {
 
 	b, _ := json.Marshal(expected)
 
-	actualStatus, err := s.client.Do(context.Background(), "POST", expectedPath, io.NopCloser(bytes.NewReader(b)), &result)
+	actualStatus, err := s.client.Do(context.Background(), "POST", expectedPath, io.NopCloser(bytes.NewReader(b)), nil, &result)
 	require.NoError(s.T(), err)
 	require.NotNil(s.T(), result)
 	require.Equal(s.T(), expected, result)

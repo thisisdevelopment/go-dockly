@@ -46,10 +46,8 @@ func New(log *xlogger.Logger,
 		return nil, errors.New("api needs a base URL")
 	}
 
-	var config *Config
-	if customConfig != nil {
-		config = customConfig
-	} else {
+	config := customConfig
+	if customConfig == nil {
 		config = GetDefaultConfig()
 	}
 
@@ -71,15 +69,11 @@ func New(log *xlogger.Logger,
 // GetDefaultConfig returns the default config for this package
 func GetDefaultConfig() *Config {
 	return &Config{
-		WaitMin:       500 * time.Millisecond,
-		WaitMax:       2 * time.Second,
-		MaxRetry:      5,
-		TrackProgress: false,
-		ContentFormat: "application/json",
-		Limiter:       defaultRateLimit(),
+		WaitMin:           500 * time.Millisecond,
+		WaitMax:           2 * time.Second,
+		MaxRetry:          5,
+		TrackProgress:     false,
+		ContentFormat:     "application/json",
+		RecycleConnection: true,
 	}
-}
-
-func defaultRateLimit() *rate.Limiter {
-	return rate.NewLimiter(rate.Every(1*time.Second), 10)
 }
