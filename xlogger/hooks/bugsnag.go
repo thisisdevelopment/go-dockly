@@ -10,7 +10,11 @@ type BugsnagHook struct {
 	levels []logrus.Level
 }
 
-func NewBugsnagHook(levels []logrus.Level) *BugsnagHook {
+func NewBugsnagHook(levels []logrus.Level, cfg ...bugsnag.Configuration) *BugsnagHook {
+	if len(cfg) > 0 {
+		bugsnag.Configure(cfg[0])
+	}
+
 	if levels == nil {
 		levels = []logrus.Level{logrus.PanicLevel, logrus.FatalLevel, logrus.ErrorLevel, logrus.WarnLevel}
 	}
