@@ -5,9 +5,9 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
-	"github.com/thisisdevelopment/go-dockly/v2/xclient"
-	"github.com/thisisdevelopment/go-dockly/v2/xhelper"
-	"github.com/thisisdevelopment/go-dockly/v2/xlogger"
+	"github.com/thisisdevelopment/go-dockly/v3/xclient"
+	"github.com/thisisdevelopment/go-dockly/v3/xhelper"
+	"github.com/thisisdevelopment/go-dockly/v3/xlogger"
 )
 
 type TestSuite struct {

@@ -3,12 +3,11 @@ package xclient_test
 import (
 	"bytes"
 	"encoding/json"
-	"io"
-	"net/http"
-
 	"github.com/stretchr/testify/require"
 	"golang.org/x/net/context"
 	"gopkg.in/h2non/gock.v1"
+	"io"
+	"net/http"
 )
 
 const (
@@ -39,7 +38,6 @@ func (s *TestSuite) Test_Client_Get() {
 }
 
 func (s *TestSuite) Test_Client_Post() {
-
 	gock.New(s.baseURL).
 		Post(expectedPath).
 		Reply(expectedStatus).

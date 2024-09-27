@@ -1,4 +1,4 @@
-package xlogger
+package hooks
 
 import (
 	"regexp"

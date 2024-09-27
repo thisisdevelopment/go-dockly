@@ -8,8 +8,8 @@ import (
 	"runtime"
 	"strings"
 
+	"dario.cat/mergo"
 	"github.com/davecgh/go-spew/spew"
-	"github.com/imdario/mergo"
 	"github.com/logrusorgru/aurora"
 	gelf "github.com/seatgeek/logrus-gelf-formatter"
 	"github.com/stretchr/testify/suite"
@@ -116,8 +116,10 @@ func (l *Logger) Log(log *logrus.Logger) *logrus.Entry {
 		if l.cfg.HideFName {
 			return log.WithField("caller", caller)
 		}
+
 		return log.WithField("caller", caller).WithField("fName", fName)
 	}
+
 	return &logrus.Entry{}
 }
 
@@ -196,6 +198,14 @@ func (l *Logger) Level() string {
 
 func (l *Logger) AddHook(hook logrus.Hook) {
 	l.log.Hooks.Add(hook)
+}
+
+func (l *Logger) Hooks() logrus.LevelHooks {
+	return l.log.Hooks
+}
+
+func (l *Logger) ErrHooks() logrus.LevelHooks {
+	return l.errLog.Hooks
 }
 
 func (l *Logger) Dump(v ...interface{}) {
