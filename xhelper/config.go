@@ -1,8 +1,8 @@
 package xhelper
 
 import (
-	"github.com/thisisdevelopment/go-dockly/v2/xconfig"
-	"github.com/thisisdevelopment/go-dockly/v2/xlogger"
+	"github.com/thisisdevelopment/go-dockly/v3/xconfig"
+	"github.com/thisisdevelopment/go-dockly/v3/xlogger"
 )
 
 // GetLogger returns the application default logger

@@ -7,7 +7,7 @@ import (
 
 	"github.com/go-redis/redis/v8"
 	"github.com/logrusorgru/aurora"
-	"github.com/thisisdevelopment/go-dockly/v2/xlogger"
+	"github.com/thisisdevelopment/go-dockly/v3/xlogger"
 )
 
 // ICache defines and exposes the caching layer

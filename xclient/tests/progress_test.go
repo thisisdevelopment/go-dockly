@@ -2,8 +2,8 @@ package tests
 
 import (
 	"context"
-	"github.com/thisisdevelopment/go-dockly/v2/xclient"
-	"github.com/thisisdevelopment/go-dockly/v2/xlogger"
+	"github.com/thisisdevelopment/go-dockly/v3/xclient"
+	"github.com/thisisdevelopment/go-dockly/v3/xlogger"
 	"testing"
 )
 

@@ -1,4 +1,4 @@
-module github.com/thisisdevelopment/go-dockly/v2
+module github.com/thisisdevelopment/go-dockly/v3
 
 go 1.22
 

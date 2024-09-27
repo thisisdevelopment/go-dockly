@@ -27,7 +27,7 @@ func (s *TestSuite) Test_Client_Get() {
 		Reply(expectedStatus).
 		JSON(expected)
 
-	actualStatus, err := s.client.Do(context.Background(), "GET", expectedPath, nil, nil, &result)
+	actualStatus, err := s.client.Do(context.Background(), "GET", expectedPath, nil, &result)
 	require.NoError(s.T(), err)
 	require.NotNil(s.T(), result)
 	require.Equal(s.T(), expected, result)
@@ -43,7 +43,7 @@ func (s *TestSuite) Test_Client_Post() {
 		Reply(expectedStatus).
 		JSON(expected)
 
-	actualStatus, err := s.client.Do(context.Background(), "POST", expectedPath, expected, nil, &result)
+	actualStatus, err := s.client.Do(context.Background(), "POST", expectedPath, expected, &result)
 	require.NoError(s.T(), err)
 	require.NotNil(s.T(), result)
 	require.Equal(s.T(), expected, result)
@@ -62,7 +62,7 @@ func (s *TestSuite) Test_Client_Post_Reader() {
 
 	b, _ := json.Marshal(expected)
 
-	actualStatus, err := s.client.Do(context.Background(), "POST", expectedPath, io.NopCloser(bytes.NewReader(b)), nil, &result)
+	actualStatus, err := s.client.Do(context.Background(), "POST", expectedPath, io.NopCloser(bytes.NewReader(b)), &result)
 	require.NoError(s.T(), err)
 	require.NotNil(s.T(), result)
 	require.Equal(s.T(), expected, result)

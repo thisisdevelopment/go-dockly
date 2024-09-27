@@ -1,7 +1,7 @@
 package tests
 
 import (
-	"github.com/thisisdevelopment/go-dockly/v2/xconfig"
+	"github.com/thisisdevelopment/go-dockly/v3/xconfig"
 	"testing"
 )
 

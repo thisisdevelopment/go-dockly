@@ -7,8 +7,8 @@ import (
 
 	"dario.cat/mergo"
 	"github.com/logrusorgru/aurora"
-	errors "github.com/thisisdevelopment/go-dockly/v2/xerrors"
-	"github.com/thisisdevelopment/go-dockly/v2/xlogger"
+	errors "github.com/thisisdevelopment/go-dockly/v3/xerrors"
+	"github.com/thisisdevelopment/go-dockly/v3/xlogger"
 )
 
 var Default *IfErr
