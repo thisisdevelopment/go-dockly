@@ -20,7 +20,7 @@ type TomlTest struct {
 func TestLoadJson(t *testing.T) {
 	var cfg JsonTest
 
-	err := xconfig.LoadConfig(&cfg, "cfg.json")
+	err := xconfig.LoadConfig("cfg.json", &cfg)
 	if err != nil {
 		t.Error(err)
 	}
@@ -31,12 +31,12 @@ func TestLoadJson(t *testing.T) {
 func TestLoadYaml(t *testing.T) {
 	var cfg YamlTest
 
-	err := xconfig.LoadConfig(&cfg, "cfg.yaml")
+	err := xconfig.LoadConfig("cfg.yaml", &cfg)
 	if err != nil {
 		t.Error(err)
 	}
 
-	err = xconfig.LoadConfig(&cfg, "cfg.yml")
+	err = xconfig.LoadConfig("cfg.yml", &cfg)
 	if err != nil {
 		t.Error(err)
 	}
@@ -47,7 +47,7 @@ func TestLoadYaml(t *testing.T) {
 func TestLoadToml(t *testing.T) {
 	var cfg TomlTest
 
-	err := xconfig.LoadConfig(&cfg, "cfg.toml")
+	err := xconfig.LoadConfig("cfg.toml", &cfg)
 	if err != nil {
 		t.Error(err)
 	}
