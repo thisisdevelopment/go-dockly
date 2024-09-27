@@ -12,7 +12,7 @@ import (
 
 // assembleRequest() returns a pointer to a http request instance
 // with method, url and params (if method type post) as inputs
-func (cli *Client) assembleRequest(method, url string, params interface{}, header map[string]string) (*http.Request, error) {
+func (cli *Client) assembleRequest(method, url string, params interface{}) (*http.Request, error) {
 	var body io.Reader
 
 	switch t := params.(type) {
@@ -53,9 +53,11 @@ func (cli *Client) assembleRequest(method, url string, params interface{}, heade
 		req.Header.Add(key, val)
 	}
 
-	for key, val := range header {
+	for key, val := range cli.perRequestHeader {
 		req.Header.Add(key, val)
 	}
+
+	cli.perRequestHeader = nil
 
 	return req, nil
 }
