@@ -53,5 +53,11 @@ func (cli *Client) assembleRequest(method, url string, params interface{}) (*htt
 		req.Header.Add(key, val)
 	}
 
+	for key, val := range cli.perRequestHeader {
+		req.Header.Add(key, val)
+	}
+
+	cli.perRequestHeader = nil
+
 	return req, nil
 }

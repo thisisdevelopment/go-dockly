@@ -8,8 +8,8 @@ import (
 	"runtime"
 	"strings"
 
+	"dario.cat/mergo"
 	"github.com/davecgh/go-spew/spew"
-	"github.com/imdario/mergo"
 	"github.com/logrusorgru/aurora"
 	gelf "github.com/seatgeek/logrus-gelf-formatter"
 	"github.com/stretchr/testify/suite"

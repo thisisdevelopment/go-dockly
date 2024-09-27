@@ -12,15 +12,17 @@ import (
 
 // IAPIClient interface definition
 type IAPIClient interface {
-	Do(ctx context.Context, method, path string, params, result interface{}) (actualStatusCode int, err error)
+	Do(ctx context.Context, method, path string, params any, result any) (actualStatusCode int, err error)
+	WithHeader(header map[string]string) IAPIClient
 }
 
 // Client defines the class implementation for this package
 type Client struct {
-	config  *Config
-	log     *xlogger.Logger
-	http    *http.Client
-	baseURL string
+	config           *Config
+	log              *xlogger.Logger
+	http             *http.Client
+	baseURL          string
+	perRequestHeader map[string]string
 }
 
 // Config defines the config properties of the package
@@ -46,10 +48,8 @@ func New(log *xlogger.Logger,
 		return nil, errors.New("api needs a base URL")
 	}
 
-	var config *Config
-	if customConfig != nil {
-		config = customConfig
-	} else {
+	config := customConfig
+	if customConfig == nil {
 		config = GetDefaultConfig()
 	}
 
@@ -68,18 +68,20 @@ func New(log *xlogger.Logger,
 	return client, nil
 }
 
+// WithHeader add per request header, is cleared after each request
+func (cli *Client) WithHeader(header map[string]string) IAPIClient {
+	cli.perRequestHeader = header
+	return cli
+}
+
 // GetDefaultConfig returns the default config for this package
 func GetDefaultConfig() *Config {
 	return &Config{
-		WaitMin:       500 * time.Millisecond,
-		WaitMax:       2 * time.Second,
-		MaxRetry:      5,
-		TrackProgress: false,
-		ContentFormat: "application/json",
-		Limiter:       defaultRateLimit(),
+		WaitMin:           500 * time.Millisecond,
+		WaitMax:           2 * time.Second,
+		MaxRetry:          5,
+		TrackProgress:     false,
+		ContentFormat:     "application/json",
+		RecycleConnection: true,
 	}
-}
-
-func defaultRateLimit() *rate.Limiter {
-	return rate.NewLimiter(rate.Every(1*time.Second), 10)
 }
