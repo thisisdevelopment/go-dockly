@@ -57,7 +57,7 @@ func (cli *Client) Do(ctx context.Context, method, path string, params any, resu
 	}
 
 	res, err := cli.http.Do(req.WithContext(ctx))
-	if err != nil {
+	if err != nil && !errors.Is(err, context.Canceled) {
 		// REMARK (official docs): On error, any Response can be ignored. A non-nil Response with a non-nil error only occurs when CheckRedirect fails,
 		// and even then the returned Response.Body is already closed.
 
