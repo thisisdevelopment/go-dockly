@@ -71,7 +71,7 @@ func (cli *Client) Do(ctx context.Context, method, path string, params any, resu
 			}
 
 			res, err = cli.http.Do(req)
-			if err != nil {
+			if err != nil && !errors.Is(err, context.Canceled) {
 				cli.log.Debugf("error in backoff request: %s", err.Error())
 				continue
 			}
