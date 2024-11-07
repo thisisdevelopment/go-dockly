@@ -13,7 +13,7 @@ func (cli *Client) handleBackoff(i int) error {
 	}
 
 	backoff := cli.backoff(i)
-	cli.log.Error("retry ", i, backoff)
+	cli.log.Info("retry ", i, backoff)
 	time.Sleep(backoff)
 
 	return nil
