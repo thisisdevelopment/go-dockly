@@ -28,6 +28,7 @@ func (c *Client) Do(ctx context.Context, method, path string, body any, result a
 	}
 
 	for _, arg := range args {
+		// assign query values and possible header if found
 		switch t := arg.(type) {
 		case url.Values:
 			query = t
@@ -77,15 +78,20 @@ doRequest:
 		}
 	}
 
+	// create fresh request from info each retry round, if user passed in io.Reader or io.ReaderCloser we can not
+	// quarantee correct behaviour (see discussion https://github.com/golang/go/issues/19653)
 	req, err := info.request()
 	if err != nil {
 		return 0, fmt.Errorf("%s %s failed to create request from info -> %w", info.method, info.url, err)
 	}
 
+	// recycle connections or not
 	req.Close = !c.recycleConnection
 
+	// make actual request
 	resp, err := c.httpClient.Do(req)
 	if c.needRetry(resp, err) {
+		// handle retry
 		var statusCode int
 
 		if resp != nil {
@@ -95,12 +101,14 @@ doRequest:
 		c.log("need retry request -> error = %v, status code = %d", err, statusCode)
 
 		if err == nil {
+			// clean up response if not empty
 			cleanupResponse(resp)
 		}
 
 		numRetries++
 
 		if numRetries < c.maxRetry {
+			// try again
 			sleep := time.Duration(math.Pow(2, float64(numRetries)) * float64(c.waitMin))
 			if sleep > c.waitMax {
 				sleep = c.waitMax
