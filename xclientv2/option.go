@@ -50,6 +50,12 @@ func WithRecycleConnection(recycleConnection bool) Option {
 	}
 }
 
+func WithContentFormat(format string) Option {
+	return func(c *Client) {
+		c.contentFormat = format
+	}
+}
+
 func WithHeader(header http.Header) Option {
 	return func(c *Client) {
 		c.header = header

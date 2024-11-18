@@ -27,6 +27,7 @@ type Client struct {
 	marshal           func(any) ([]byte, error)
 	unmarshal         func([]byte, any) error
 	logf              LogFunc
+	contentFormat     string
 }
 
 func New(baseURL string, options ...Option) *Client {
@@ -42,6 +43,7 @@ func New(baseURL string, options ...Option) *Client {
 		marshal:           json.Marshal,
 		unmarshal:         json.Unmarshal,
 		logf:              log.Printf,
+		contentFormat:     DefaultContentFormat,
 	}
 
 	for _, opt := range options {
@@ -52,10 +54,10 @@ func New(baseURL string, options ...Option) *Client {
 		c.httpClient = &http.Client{}
 	}
 
-	if c.header == nil {
+	if c.header == nil && c.contentFormat != "" {
 		c.header = make(http.Header)
-		c.header.Add("accept", "application/json")
-		c.header.Add("content-type", "application/json")
+		c.header.Add("accept", c.contentFormat)
+		c.header.Add("content-type", c.contentFormat)
 	}
 
 	return c

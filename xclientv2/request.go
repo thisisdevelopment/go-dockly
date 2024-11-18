@@ -45,15 +45,17 @@ func (c *Client) newRequestInfo(ctx context.Context, method, requestUrl string, 
 
 	reqHeader := http.Header{}
 
+	// first set client headers
 	for k, v := range c.header {
 		for _, vv := range v {
-			reqHeader.Add(k, vv)
+			reqHeader.Set(k, vv)
 		}
 	}
 
+	// set request headers (can overwrite client headers)
 	for k, v := range header {
 		for _, vv := range v {
-			reqHeader.Add(k, vv)
+			reqHeader.Set(k, vv)
 		}
 	}
 

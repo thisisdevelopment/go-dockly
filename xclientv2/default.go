@@ -14,6 +14,7 @@ const (
 	DefaultWaitMax           = 2 * time.Second
 	DefaultRecycleConnection = true
 	DefaultTrackProgress     = false
+	DefaultContentFormat     = "application/json"
 )
 
 func defaultNeedRetry(resp *http.Response, err error) bool {
