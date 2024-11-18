@@ -1,4 +1,4 @@
-package xclientv2
+package xhttpclient
 
 import (
 	"io"

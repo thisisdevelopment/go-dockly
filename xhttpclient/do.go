@@ -1,4 +1,4 @@
-package xclientv2
+package xhttpclient
 
 import (
 	"context"
@@ -108,7 +108,7 @@ doRequest:
 		numRetries++
 
 		if numRetries < c.maxRetry {
-			// try again
+			// try again after some time
 			sleep := time.Duration(math.Pow(2, float64(numRetries)) * float64(c.waitMin))
 			if sleep > c.waitMax {
 				sleep = c.waitMax

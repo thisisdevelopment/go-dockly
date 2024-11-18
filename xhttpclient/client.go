@@ -1,11 +1,12 @@
-package xclientv2
+package xhttpclient
 
 import (
 	"encoding/json"
-	"golang.org/x/time/rate"
 	"log"
 	"net/http"
 	"time"
+
+	"golang.org/x/time/rate"
 )
 
 type NeedRetryFunc func(*http.Response, error) bool
