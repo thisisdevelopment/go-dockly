@@ -1,0 +1,32 @@
+package xclientv2
+
+import (
+	"io"
+)
+
+func (c *Client) readResponse(b io.Reader, result any) error {
+	switch t := result.(type) {
+	case io.Writer:
+		_, err := io.Copy(t, b)
+		return err
+	case io.WriteCloser:
+		_, err := io.Copy(t, b)
+		return err
+	case *[]byte:
+		body, err := io.ReadAll(b)
+		if err != nil {
+			return err
+		}
+		*t = body
+	default:
+		body, err := io.ReadAll(b)
+		if err != nil {
+			return err
+		}
+		if c.unmarshal != nil {
+			return c.unmarshal(body, result)
+		}
+	}
+
+	return nil
+}
