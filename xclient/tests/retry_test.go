@@ -1,15 +1,16 @@
-package xhttpclient
+package tests
 
 import (
 	"context"
 	"errors"
+	"github.com/thisisdevelopment/go-dockly/v3/xclient"
+	"github.com/thisisdevelopment/go-dockly/v3/xlogger"
 	"io"
 	"log"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
 	"testing"
-	"time"
 )
 
 type TestStruct struct {
@@ -17,24 +18,18 @@ type TestStruct struct {
 	Test2 string `json:"test2"`
 }
 
-type TestLogger struct{}
+func TestClient(t *testing.T) {
+	l, err := xlogger.New(&xlogger.Config{
+		Level:  "debug",
+		Format: "text",
+	})
 
-func (l *TestLogger) Debugf(format string, args ...interface{}) {
-	log.Printf(format, args...)
-}
-
-func TestTrackProgress(t *testing.T) {
-	var data []byte
-	client := New("test", WithTimeout(240*time.Second), WithTrackProgress(true), WithLog(t.Logf))
-	statusCode, err := client.Do(context.Background(), "GET", "https://ash-speed.hetzner.com/100MB.bin", nil, &data)
 	if err != nil {
 		t.Fatalf("fatal err: %v", err.Error())
 	}
 
-	t.Logf("statusCode: %v", statusCode)
-}
+	cfg := xclient.GetDefaultConfig()
 
-func TestClient(t *testing.T) {
 	retries := 0
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -69,13 +64,12 @@ func TestClient(t *testing.T) {
 	defer server.Close()
 
 	var ts TestStruct
-	var logger = &TestLogger{}
 
 	ts.Test1 = "ts1"
 	ts.Test2 = "ts2"
 
-	client := New(server.URL, WithLog(logger.Debugf))
-	statusCode, err := client.Do(context.Background(), "GET", "/test", &ts, &ts, url.Values{"test": {"test1"}, "test2": {"test2"}})
+	cli, _ := xclient.New(l, server.URL, nil, cfg)
+	statusCode, err := cli.Do(context.Background(), "GET", "/test", &ts, &ts, url.Values{"test": {"test1"}, "test2": {"test2"}})
 	if err != nil {
 		log.Printf("err statusCode: %d", statusCode)
 		log.Printf("context cancelled? %v", errors.Is(err, context.Canceled))

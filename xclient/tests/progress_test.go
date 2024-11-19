@@ -19,6 +19,7 @@ func TestTrackProgress(t *testing.T) {
 
 	cfg := xclient.GetDefaultConfig()
 	cfg.TrackProgress = true
+	cfg.ContentFormat = "application/json"
 
 	cl, err := xclient.New(l, "test", nil, cfg)
 	if err != nil {
@@ -27,7 +28,7 @@ func TestTrackProgress(t *testing.T) {
 
 	var data []byte
 
-	statusCode, err := cl.WithHeader(map[string]string{"accept": "application/json"}).Do(context.Background(), "GET", "https://ash-speed.hetzner.com/100MB.bin", nil, &data)
+	statusCode, err := cl.Do(context.Background(), "GET", "https://ash-speed.hetzner.com/100MB.bin", nil, &data)
 	if err != nil {
 		t.Fatalf("fatal err: %v", err.Error())
 	}
