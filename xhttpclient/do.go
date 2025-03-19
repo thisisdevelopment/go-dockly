@@ -11,6 +11,11 @@ import (
 	"time"
 )
 
+/*
+Do executes a request on this client. First arg is a context which is passed to the http request, if a deadline is not set, we
+will add one for request timeout. Query parameters (as url.Values) and headers (as http.Header) for this specific request
+can be passed as optional args in any order.
+*/
 func (c *Client) Do(ctx context.Context, method, path string, body any, result any, args ...any) (int, error) {
 	var (
 		query      url.Values
@@ -47,7 +52,7 @@ func (c *Client) Do(ctx context.Context, method, path string, body any, result a
 	}
 
 	if query != nil {
-		requestUrl += "?" + query.Encode()
+		requestUrl = fmt.Sprintf("%s?%s", requestUrl, query.Encode())
 	}
 
 	info, err := c.newRequestInfo(ctx, method, requestUrl, body, header)
@@ -59,7 +64,12 @@ func (c *Client) Do(ctx context.Context, method, path string, body any, result a
 }
 
 func (c *Client) do(info *requestInfo, result any) (int, error) {
-	var numRetries int
+	var (
+		numRetries int
+		resp       *http.Response
+		req        *http.Request
+		err        error
+	)
 
 	cleanupResponse := func(res *http.Response) {
 		// make sure we read everything even if we do nothing with the
@@ -69,57 +79,65 @@ func (c *Client) do(info *requestInfo, result any) (int, error) {
 		_ = res.Body.Close()
 	}
 
-doRequest:
-	if c.limiter != nil {
-		// blocking call to honor the rate limit
-		err := c.limiter.Wait(info.ctx)
-		if err != nil {
-			return 0, fmt.Errorf("rate limiter %s %s: %w", info.method, info.url, err)
-		}
-	}
-
-	// create fresh request from info each retry round, if user passed in io.Reader or io.ReaderCloser we can not
-	// quarantee correct behaviour (see discussion https://github.com/golang/go/issues/19653)
-	req, err := info.request()
-	if err != nil {
-		return 0, fmt.Errorf("%s %s failed to create request from info -> %w", info.method, info.url, err)
-	}
-
-	// recycle connections or not
-	req.Close = !c.recycleConnection
-
-	// make actual request
-	resp, err := c.httpClient.Do(req)
-	if c.needRetry(resp, err) {
-		// handle retry
-		var statusCode int
-
-		if resp != nil {
-			statusCode = resp.StatusCode
-		}
-
-		c.log("need retry request -> error = %v, status code = %d", err, statusCode)
-
-		if err == nil {
-			// clean up response if not empty
-			cleanupResponse(resp)
-		}
-
-		numRetries++
-
-		if numRetries < c.maxRetry {
-			// try again after some time
-			sleep := time.Duration(math.Pow(2, float64(numRetries)) * float64(c.waitMin))
-			if sleep > c.waitMax {
-				sleep = c.waitMax
+	retry := true
+	for retry {
+		if c.limiter != nil {
+			// blocking call to honor the rate limit
+			err = c.limiter.Wait(info.ctx)
+			if err != nil {
+				return 0, fmt.Errorf("rate limiter %s %s: %w", info.method, info.url, err)
 			}
-			time.Sleep(sleep)
-			goto doRequest
+		}
+
+		// create fresh request from info each retry round, if user passed in io.Reader or io.ReaderCloser we can not
+		// quarantee correct behaviour (see discussion https://github.com/golang/go/issues/19653)
+		req, err = info.request()
+		if err != nil {
+			return 0, fmt.Errorf("%s %s failed to create request from info -> %w", info.method, info.url, err)
+		}
+
+		// recycle connections or not
+		req.Close = !c.recycleConnection
+
+		// make actual request
+		resp, err = c.httpClient.Do(req)
+		if c.needRetry(resp, err) {
+			// handle retry
+			var statusCode int
+
+			if resp != nil {
+				statusCode = resp.StatusCode
+			}
+
+			c.log("need retry request -> error = %v, status code = %d", err, statusCode)
+
+			if err == nil {
+				// clean up response if not empty
+				cleanupResponse(resp)
+			}
+
+			numRetries++
+
+			if numRetries < c.maxRetry {
+				// try again after some time
+				sleep := time.Duration(math.Pow(2, float64(numRetries)) * float64(c.waitMin))
+				if sleep > c.waitMax {
+					sleep = c.waitMax
+				}
+				time.Sleep(sleep)
+				continue
+			}
+		}
+
+		retry = false
+
+		if err != nil {
+			return 0, err
 		}
 	}
 
-	if err != nil {
-		return 0, err
+	if resp == nil {
+		return 0, fmt.Errorf("empty response should not occur")
 	}
 
 	defer cleanupResponse(resp)

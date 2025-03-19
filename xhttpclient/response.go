@@ -9,9 +9,6 @@ func (c *Client) readResponse(b io.Reader, result any) error {
 	case io.Writer:
 		_, err := io.Copy(t, b)
 		return err
-	case io.WriteCloser:
-		_, err := io.Copy(t, b)
-		return err
 	case *[]byte:
 		body, err := io.ReadAll(b)
 		if err != nil {
