@@ -45,12 +45,17 @@ func clearResponse(resp *http.Response) {
 //
 // The request method, URL, and any parameters will be logged using the Client's Logger.
 //
+// The optional args are checked and if it is a url.Values it will be set as query parameters and if it is http.Header
+// it will be set as per request header.
+//
 // This function is intended to be used by the generated clients, and should not be called directly by the user.
 func (cli *Client) Do(ctx context.Context, method, path string, body any, result any, args ...any) (actualStatusCode int, err error) {
 	var (
 		query  url.Values
 		header http.Header
 		reqUrl string
+		req    *http.Request
+		res    *http.Response
 	)
 
 	if strings.HasPrefix(path, "http") {
@@ -73,7 +78,7 @@ func (cli *Client) Do(ctx context.Context, method, path string, body any, result
 	}
 
 	if query != nil {
-		reqUrl += "?" + query.Encode()
+		reqUrl = fmt.Sprintf("%s?%s", reqUrl, query.Encode())
 	}
 
 	cli.log.Debugln(aurora.Cyan(method), aurora.Yellow(reqUrl))
@@ -85,31 +90,35 @@ func (cli *Client) Do(ctx context.Context, method, path string, body any, result
 
 	var numRetries int
 
-doRequest:
-	if cli.config.Limiter != nil {
-		err = cli.config.Limiter.Wait(ctx) // blocking call to honor the rate limit
+	retry := true
+	for retry {
+		if cli.config.Limiter != nil {
+			err = cli.config.Limiter.Wait(ctx) // blocking call to honor the rate limit
+			if err != nil {
+				return 0, errors.Wrapf(err, "rate limiter %s %s", method, reqUrl)
+			}
+		}
+
+		req, err = info.request()
 		if err != nil {
-			return 0, errors.Wrapf(err, "rate limiter %s %s", method, reqUrl)
-		}
-	}
-
-	req, err := info.request()
-	if err != nil {
-		return 0, errors.Wrapf(err, "assemble request %s %s", method, reqUrl)
-	}
-
-	req.Close = !cli.config.RecycleConnection
-
-	res, err := cli.http.Do(req.WithContext(ctx))
-	if needRetry(res, err) {
-		if err == nil {
-			clearResponse(res)
+			return 0, errors.Wrapf(err, "assemble request %s %s", method, reqUrl)
 		}
 
-		if cli.retry(numRetries) {
-			numRetries++
-			goto doRequest
+		req.Close = !cli.config.RecycleConnection
+
+		res, err = cli.http.Do(req.WithContext(ctx))
+		if needRetry(res, err) {
+			if err == nil {
+				clearResponse(res)
+			}
+
+			if cli.retry(numRetries) {
+				numRetries++
+				continue
+			}
 		}
+
+		retry = false
 	}
 
 	if err != nil {
