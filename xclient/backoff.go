@@ -1,22 +1,28 @@
 package xclient
 
 import (
+	"context"
+	"errors"
 	"math"
+	"net/http"
 	"time"
-
-	"github.com/pkg/errors"
 )
 
-func (cli *Client) handleBackoff(i int) error {
+func needRetry(resp *http.Response, err error) bool {
+	return (err != nil && !errors.Is(err, context.DeadlineExceeded) && !errors.Is(err, context.Canceled)) ||
+		(resp != nil && resp.StatusCode >= http.StatusInternalServerError)
+}
+
+func (cli *Client) retry(i int) bool {
 	if i > cli.config.MaxRetry {
-		return errors.New("backoff exhausted")
+		return false
 	}
 
 	backoff := cli.backoff(i)
 	cli.log.Info("retry ", i, backoff)
 	time.Sleep(backoff)
 
-	return nil
+	return true
 }
 
 // performs exponential backoff based on attempts and limited by waitMax

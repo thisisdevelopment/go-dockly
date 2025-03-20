@@ -2,6 +2,7 @@ package xclient
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -10,54 +11,88 @@ import (
 	"github.com/pkg/errors"
 )
 
-// assembleRequest() returns a pointer to a http request instance
-// with method, url and params (if method type post) as inputs
-func (cli *Client) assembleRequest(method, url string, params interface{}) (*http.Request, error) {
-	var body io.Reader
+type requestInfo struct {
+	bodyData []byte
+	reader   io.Reader
+	header   http.Header
+	method   string
+	url      string
+	ctx      context.Context
+}
 
-	switch t := params.(type) {
+func (info *requestInfo) request() (*http.Request, error) {
+	var reader io.Reader
+
+	if info.reader != nil {
+		reader = info.reader
+	} else if info.bodyData != nil {
+		reader = bytes.NewReader(info.bodyData)
+	}
+
+	req, err := http.NewRequestWithContext(info.ctx, info.method, info.url, reader)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header = info.header
+
+	return req, nil
+}
+
+func (cli *Client) newRequestInfo(ctx context.Context, method, requestUrl string, body any, header http.Header) (*requestInfo, error) {
+	var info requestInfo
+
+	info.url = requestUrl
+	info.method = method
+	info.ctx = ctx
+
+	reqHeader := http.Header{}
+
+	reqHeader.Add("Accept", cli.config.ContentFormat)
+	reqHeader.Add("Content-Type", cli.config.ContentFormat)
+
+	for key, val := range cli.config.CustomHeader {
+		reqHeader.Add(key, val)
+	}
+
+	for key, val := range cli.perRequestHeader {
+		reqHeader.Add(key, val)
+	}
+
+	for key, vals := range header {
+		for _, val := range vals {
+			reqHeader.Add(key, val)
+		}
+	}
+
+	info.header = reqHeader
+
+	switch t := body.(type) {
 	case io.ReadCloser:
-		// assign the raw params as read closer interface to the body as is
-		body = t
+		info.reader = t
 	case io.Reader:
-		body = t
+		info.reader = t
+	case []byte:
+		info.bodyData = t
 	default:
-		if params != nil {
+		if body != nil {
 			var b []byte
 			var err error
 
 			if cli.config.UseJsoniter {
-				b, err = jsoniter.ConfigCompatibleWithStandardLibrary.Marshal(params)
+				b, err = jsoniter.ConfigCompatibleWithStandardLibrary.Marshal(body)
 				if err != nil {
 					return nil, errors.Wrap(err, "json encode dto jsoniter")
 				}
 			} else {
-				b, err = json.Marshal(params)
+				b, err = json.Marshal(body)
 				if err != nil {
 					return nil, errors.Wrap(err, "json encode dto")
 				}
 			}
-			body = bytes.NewReader(b)
+			info.bodyData = b
 		}
 	}
 
-	req, err := http.NewRequest(method, url, body)
-	if err != nil {
-		return nil, errors.Wrapf(err, "%s request initialization failed for %s", method, url)
-	}
-
-	req.Header.Add("Accept", cli.config.ContentFormat)
-	req.Header.Add("Content-Type", cli.config.ContentFormat)
-
-	for key, val := range cli.config.CustomHeader {
-		req.Header.Add(key, val)
-	}
-
-	for key, val := range cli.perRequestHeader {
-		req.Header.Add(key, val)
-	}
-
-	cli.perRequestHeader = nil
-
-	return req, nil
+	return &info, nil
 }
