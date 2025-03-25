@@ -64,7 +64,7 @@ func WithHeader(header http.Header) Option {
 
 func WithHeaderMap(headerMap map[string]string) Option {
 	return func(c *Client) {
-		var header http.Header
+		header := make(http.Header)
 
 		for k, v := range headerMap {
 			header.Set(k, v)
