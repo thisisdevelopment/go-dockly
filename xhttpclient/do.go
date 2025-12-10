@@ -11,12 +11,31 @@ import (
 	"time"
 )
 
+type Response struct {
+	StatusCode    int
+	Status        string
+	Header        http.Header
+	ContentLength int64
+}
+
 /*
 Do executes a request on this client. First arg is a context which is passed to the http request, if a deadline is not set, we
 will add one for request timeout. Query parameters (as url.Values) and headers (as http.Header) for this specific request
 can be passed as optional args in any order.
 */
 func (c *Client) Do(ctx context.Context, method, path string, body any, result any, args ...any) (int, error) {
+	resp, err := c.DoWithResponse(ctx, method, path, body, result, args...)
+	if err != nil {
+		return 0, err
+	}
+
+	return resp.StatusCode, nil
+}
+
+/*
+DoWithResponse sames as Do but returns a more informative response besides status code
+*/
+func (c *Client) DoWithResponse(ctx context.Context, method, path string, body any, result any, args ...any) (*Response, error) {
 	var (
 		query      url.Values
 		header     http.Header
@@ -47,7 +66,7 @@ func (c *Client) Do(ctx context.Context, method, path string, body any, result a
 	} else {
 		requestUrl, err = url.JoinPath(c.baseURL, path)
 		if err != nil {
-			return 0, fmt.Errorf("failed to join url path -> %w", err)
+			return nil, fmt.Errorf("failed to join url path -> %w", err)
 		}
 	}
 
@@ -57,13 +76,13 @@ func (c *Client) Do(ctx context.Context, method, path string, body any, result a
 
 	info, err := c.newRequestInfo(ctx, method, requestUrl, body, header)
 	if err != nil {
-		return 0, fmt.Errorf("failed to create new request info -> %w", err)
+		return nil, fmt.Errorf("failed to create new request info -> %w", err)
 	}
 
 	return c.do(info, result)
 }
 
-func (c *Client) do(info *requestInfo, result any) (int, error) {
+func (c *Client) do(info *requestInfo, result any) (*Response, error) {
 	var (
 		numRetries int
 		resp       *http.Response
@@ -85,7 +104,7 @@ func (c *Client) do(info *requestInfo, result any) (int, error) {
 			// blocking call to honor the rate limit
 			err = c.limiter.Wait(info.ctx)
 			if err != nil {
-				return 0, fmt.Errorf("rate limiter %s %s: %w", info.method, info.url, err)
+				return nil, fmt.Errorf("rate limiter %s %s: %w", info.method, info.url, err)
 			}
 		}
 
@@ -93,7 +112,7 @@ func (c *Client) do(info *requestInfo, result any) (int, error) {
 		// quarantee correct behaviour (see discussion https://github.com/golang/go/issues/19653)
 		req, err = info.request()
 		if err != nil {
-			return 0, fmt.Errorf("%s %s failed to create request from info -> %w", info.method, info.url, err)
+			return nil, fmt.Errorf("%s %s failed to create request from info -> %w", info.method, info.url, err)
 		}
 
 		// recycle connections or not
@@ -132,12 +151,12 @@ func (c *Client) do(info *requestInfo, result any) (int, error) {
 		retry = false
 
 		if err != nil {
-			return 0, err
+			return nil, err
 		}
 	}
 
 	if resp == nil {
-		return 0, fmt.Errorf("empty response should not occur")
+		return nil, fmt.Errorf("empty response should not occur")
 	}
 
 	defer cleanupResponse(resp)
@@ -148,12 +167,17 @@ func (c *Client) do(info *requestInfo, result any) (int, error) {
 		if c.trackProgress {
 			bodyReader, err = c.wrapTrackProgressReader(info.ctx, resp, bodyReader)
 			if err != nil {
-				return 0, err
+				return nil, err
 			}
 		}
 
 		err = c.readResponse(bodyReader, result)
 	}
 
-	return resp.StatusCode, err
+	return &Response{
+		Status:        resp.Status,
+		StatusCode:    resp.StatusCode,
+		Header:        resp.Header,
+		ContentLength: resp.ContentLength,
+	}, err
 }
