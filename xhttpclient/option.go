@@ -14,6 +14,12 @@ func WithHTTPClient(httpClient *http.Client) Option {
 	}
 }
 
+func WithVerbose(verbose bool) Option {
+	return func(c *Client) {
+		c.verbose = verbose
+	}
+}
+
 func WithTimeout(timeout time.Duration) Option {
 	return func(c *Client) {
 		c.timeout = timeout

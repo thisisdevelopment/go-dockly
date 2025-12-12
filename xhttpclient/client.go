@@ -29,6 +29,7 @@ type Client struct {
 	unmarshal         func([]byte, any) error
 	logf              LogFunc
 	contentFormat     string
+	verbose           bool
 }
 
 func New(baseURL string, options ...Option) *Client {
@@ -62,10 +63,4 @@ func New(baseURL string, options ...Option) *Client {
 	}
 
 	return c
-}
-
-func (c *Client) log(format string, v ...interface{}) {
-	if c.logf != nil {
-		c.logf(format, v...)
-	}
 }

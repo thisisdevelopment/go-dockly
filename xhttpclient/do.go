@@ -74,6 +74,11 @@ func (c *Client) DoWithResponse(ctx context.Context, method, path string, body a
 		requestUrl = fmt.Sprintf("%s?%s", requestUrl, query.Encode())
 	}
 
+	c.log("%s %s", method, requestUrl)
+	for k, v := range header {
+		c.log("request header %s: [%s]", k, strings.Join(v, ","))
+	}
+
 	info, err := c.newRequestInfo(ctx, method, requestUrl, body, header)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create new request info -> %w", err)
@@ -159,6 +164,8 @@ func (c *Client) do(info *requestInfo, result any) (*Response, error) {
 		return nil, fmt.Errorf("empty response should not occur")
 	}
 
+	c.log("response status: %s...", resp.Status)
+
 	defer cleanupResponse(resp)
 
 	var bodyReader io.Reader = resp.Body
@@ -172,6 +179,10 @@ func (c *Client) do(info *requestInfo, result any) (*Response, error) {
 		}
 
 		err = c.readResponse(bodyReader, result)
+	}
+
+	for k, v := range resp.Header {
+		c.log("response header %s: [%s]", k, strings.Join(v, ","))
 	}
 
 	return &Response{
