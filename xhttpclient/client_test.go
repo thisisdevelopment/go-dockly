@@ -77,7 +77,7 @@ func TestClient(t *testing.T) {
 	h.Add("Accept", "application/json")
 
 	client := New(server.URL, WithLog(logger.Debugf), WithVerbose(true))
-	statusCode, err := client.Do(context.Background(), "GET", "/test", &ts, &ts, url.Values{"test": {"test1"}, "test2": {"test2"}}, h)
+	statusCode, err := client.Do(context.Background(), "GET", "/test?ali=baba", &ts, &ts, url.Values{"test": {"test1"}, "test2": {"test2"}}, h)
 	if err != nil {
 		log.Printf("err statusCode: %d", statusCode)
 		log.Printf("context cancelled? %v", errors.Is(err, context.Canceled))

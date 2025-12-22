@@ -37,10 +37,8 @@ DoWithResponse sames as Do but returns a more informative response besides statu
 */
 func (c *Client) DoWithResponse(ctx context.Context, method, path string, body any, result any, args ...any) (*Response, error) {
 	var (
-		query      url.Values
-		header     http.Header
-		requestUrl string
-		err        error
+		query  url.Values
+		header http.Header
 	)
 
 	_, ok := ctx.Deadline()
@@ -61,17 +59,9 @@ func (c *Client) DoWithResponse(ctx context.Context, method, path string, body a
 		}
 	}
 
-	if strings.HasPrefix(path, "http") {
-		requestUrl = path
-	} else {
-		requestUrl, err = url.JoinPath(c.baseURL, path)
-		if err != nil {
-			return nil, fmt.Errorf("failed to join url path -> %w", err)
-		}
-	}
-
-	if query != nil {
-		requestUrl = fmt.Sprintf("%s?%s", requestUrl, query.Encode())
+	requestUrl, err := c.buildUrl(path, query)
+	if err != nil {
+		return nil, err
 	}
 
 	c.log("%s %s", method, requestUrl)
@@ -85,6 +75,36 @@ func (c *Client) DoWithResponse(ctx context.Context, method, path string, body a
 	}
 
 	return c.do(info, result)
+}
+
+func (c *Client) buildUrl(path string, inputParams url.Values) (string, error) {
+	var rawURL string
+
+	if strings.HasPrefix(path, "http") {
+		rawURL = path
+	} else {
+		rawURL = fmt.Sprintf("%s/%s", c.baseURL, strings.TrimPrefix(path, "/"))
+	}
+
+	// parse url to validate and get query
+	u, err := url.Parse(rawURL)
+	if err != nil {
+		return "", fmt.Errorf("error parsing raw url %s: %w", rawURL, err)
+	}
+
+	// get existing query params
+	q := u.Query()
+
+	// if we have extra input query params add them to existing query
+	for k, vs := range inputParams {
+		for _, v := range vs {
+			q.Add(k, v)
+		}
+	}
+
+	u.RawQuery = q.Encode()
+
+	return u.String(), nil
 }
 
 func (c *Client) do(info *requestInfo, result any) (*Response, error) {

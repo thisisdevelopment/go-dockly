@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	"golang.org/x/time/rate"
@@ -34,7 +35,7 @@ type Client struct {
 
 func New(baseURL string, options ...Option) *Client {
 	c := &Client{
-		baseURL:           baseURL,
+		baseURL:           strings.TrimSuffix(baseURL, "/"),
 		timeout:           DefaultTimeout,
 		maxRetry:          DefaultMaxRetry,
 		waitMin:           DefaultWaitMin,
