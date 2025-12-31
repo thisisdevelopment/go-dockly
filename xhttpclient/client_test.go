@@ -76,7 +76,12 @@ func TestClient(t *testing.T) {
 	h := http.Header{}
 	h.Add("Accept", "application/json")
 
-	client := New(server.URL, WithLog(logger.Debugf), WithVerbose(true))
+	client := New(
+		server.URL,
+		WithLog(logger.Debugf),
+		WithVerbose(true),
+		WithQueryParamMap(map[string]string{"hallo": "hello"}),
+	)
 	statusCode, err := client.Do(context.Background(), "GET", "/test?ali=baba", &ts, &ts, url.Values{"test": {"test1"}, "test2": {"test2"}}, h)
 	if err != nil {
 		log.Printf("err statusCode: %d", statusCode)

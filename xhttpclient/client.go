@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"net/url"
 	"strings"
 	"time"
 
@@ -24,6 +25,7 @@ type Client struct {
 	limiter           *rate.Limiter
 	recycleConnection bool
 	header            http.Header
+	queryParams       url.Values
 	trackProgress     bool
 	needRetry         NeedRetryFunc
 	marshal           func(any) ([]byte, error)

@@ -77,6 +77,22 @@ func (c *Client) DoWithResponse(ctx context.Context, method, path string, body a
 	return c.do(info, result)
 }
 
+func (c *Client) mergeQueryParams(inputParams url.Values) url.Values {
+	merged := make(url.Values)
+
+	// first add global query params
+	for k, v := range c.queryParams {
+		merged[k] = v
+	}
+
+	// local query params, overwrite existing from global
+	for k, v := range inputParams {
+		merged[k] = v
+	}
+
+	return merged
+}
+
 func (c *Client) buildUrl(path string, inputParams url.Values) (string, error) {
 	var rawURL string
 
@@ -92,11 +108,11 @@ func (c *Client) buildUrl(path string, inputParams url.Values) (string, error) {
 		return "", fmt.Errorf("error parsing raw url %s: %w", rawURL, err)
 	}
 
-	// get existing query params
+	// get query params from url
 	q := u.Query()
 
-	// if we have extra input query params add them to existing query
-	for k, vs := range inputParams {
+	// add global and request based query params
+	for k, vs := range c.mergeQueryParams(inputParams) {
 		for _, v := range vs {
 			q.Add(k, v)
 		}
