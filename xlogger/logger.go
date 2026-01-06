@@ -26,9 +26,8 @@ type Config struct {
 }
 
 type Logger struct {
-	log    *logrus.Logger
-	errLog *logrus.Logger
-	cfg    *Config
+	log *logrus.Logger
+	cfg *Config
 }
 
 func New(inputCfg *Config) (*Logger, error) {
@@ -72,12 +71,6 @@ func New(inputCfg *Config) (*Logger, error) {
 	l := &Logger{
 		log: &logrus.Logger{
 			Out:       os.Stdout,
-			Hooks:     make(logrus.LevelHooks),
-			Formatter: formatter,
-			Level:     logLevel,
-		},
-		errLog: &logrus.Logger{
-			Out:       os.Stderr,
 			Hooks:     make(logrus.LevelHooks),
 			Formatter: formatter,
 			Level:     logLevel,
@@ -204,8 +197,11 @@ func (l *Logger) Hooks() logrus.LevelHooks {
 	return l.log.Hooks
 }
 
+// ErrHooks returns the hooks for the logger.
+// Deprecated: Since all log levels now use the same logger, this returns the same as Hooks().
+// Kept for backward compatibility.
 func (l *Logger) ErrHooks() logrus.LevelHooks {
-	return l.errLog.Hooks
+	return l.log.Hooks
 }
 
 func (l *Logger) Dump(v ...interface{}) {
@@ -227,13 +223,13 @@ func (l *Logger) Infof(format string, v ...interface{}) {
 
 func (l *Logger) Fatalf(format string, v ...interface{}) {
 	if l.log.Level >= logrus.FatalLevel {
-		l.Log(l.errLog).Fatalf(format, v...)
+		l.Log(l.log).Fatalf(format, v...)
 	}
 }
 
 func (l *Logger) Panicf(format string, v ...interface{}) {
 	if l.log.Level >= logrus.PanicLevel {
-		l.Log(l.errLog).Panicf(format, v...)
+		l.Log(l.log).Panicf(format, v...)
 	}
 }
 
@@ -257,7 +253,7 @@ func (l *Logger) Warningf(format string, v ...interface{}) {
 
 func (l *Logger) Errorf(format string, v ...interface{}) {
 	if l.log.Level >= logrus.ErrorLevel {
-		l.Log(l.errLog).Errorf(format, v...)
+		l.Log(l.log).Errorf(format, v...)
 	}
 }
 
@@ -275,13 +271,13 @@ func (l *Logger) Info(v ...interface{}) {
 
 func (l *Logger) Fatal(v ...interface{}) {
 	if l.log.Level >= logrus.FatalLevel {
-		l.Log(l.errLog).Fatal(v...)
+		l.Log(l.log).Fatal(v...)
 	}
 }
 
 func (l *Logger) Panic(v ...interface{}) {
 	if l.log.Level >= logrus.PanicLevel {
-		l.Log(l.errLog).Panic(v...)
+		l.Log(l.log).Panic(v...)
 	}
 }
 
@@ -305,7 +301,7 @@ func (l *Logger) Warning(v ...interface{}) {
 
 func (l *Logger) Error(v ...interface{}) {
 	if l.log.Level >= logrus.ErrorLevel {
-		l.Log(l.errLog).Error(v...)
+		l.Log(l.log).Error(v...)
 	}
 }
 
@@ -317,13 +313,13 @@ func (l *Logger) Println(v ...interface{}) {
 
 func (l *Logger) Fatalln(v ...interface{}) {
 	if l.log.Level >= logrus.FatalLevel {
-		l.Log(l.errLog).Fatalln(v...)
+		l.Log(l.log).Fatalln(v...)
 	}
 }
 
 func (l *Logger) Panicln(v ...interface{}) {
 	if l.log.Level >= logrus.PanicLevel {
-		l.Log(l.errLog).Panicln(v...)
+		l.Log(l.log).Panicln(v...)
 	}
 }
 
@@ -347,6 +343,6 @@ func (l *Logger) Warningln(v ...interface{}) {
 
 func (l *Logger) Errorln(v ...interface{}) {
 	if l.log.Level >= logrus.ErrorLevel {
-		l.Log(l.errLog).Errorln(v...)
+		l.Log(l.log).Errorln(v...)
 	}
 }
