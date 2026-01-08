@@ -37,10 +37,8 @@ DoWithResponse sames as Do but returns a more informative response besides statu
 */
 func (c *Client) DoWithResponse(ctx context.Context, method, path string, body any, result any, args ...any) (*Response, error) {
 	var (
-		query      url.Values
-		header     http.Header
-		requestUrl string
-		err        error
+		query  url.Values
+		header http.Header
 	)
 
 	_, ok := ctx.Deadline()
@@ -61,17 +59,14 @@ func (c *Client) DoWithResponse(ctx context.Context, method, path string, body a
 		}
 	}
 
-	if strings.HasPrefix(path, "http") {
-		requestUrl = path
-	} else {
-		requestUrl, err = url.JoinPath(c.baseURL, path)
-		if err != nil {
-			return nil, fmt.Errorf("failed to join url path -> %w", err)
-		}
+	requestUrl, err := c.buildUrl(path, query)
+	if err != nil {
+		return nil, err
 	}
 
-	if query != nil {
-		requestUrl = fmt.Sprintf("%s?%s", requestUrl, query.Encode())
+	c.log("%s %s", method, requestUrl)
+	for k, v := range header {
+		c.log("request header %s: [%s]", k, strings.Join(v, ","))
 	}
 
 	info, err := c.newRequestInfo(ctx, method, requestUrl, body, header)
@@ -80,6 +75,50 @@ func (c *Client) DoWithResponse(ctx context.Context, method, path string, body a
 	}
 
 	return c.do(info, result)
+}
+
+func (c *Client) mergeQueryParams(inputParams url.Values) url.Values {
+	merged := make(url.Values)
+
+	// first add global query params
+	for k, v := range c.queryParams {
+		merged[k] = v
+	}
+
+	// local query params, overwrite existing from global
+	for k, v := range inputParams {
+		merged[k] = v
+	}
+
+	return merged
+}
+
+func (c *Client) buildUrl(path string, inputParams url.Values) (string, error) {
+	var rawURL string
+
+	if strings.HasPrefix(path, "http") {
+		rawURL = path
+	} else {
+		rawURL = fmt.Sprintf("%s/%s", c.baseURL, strings.TrimPrefix(path, "/"))
+	}
+
+	// parse url to validate and get query
+	u, err := url.Parse(rawURL)
+	if err != nil {
+		return "", fmt.Errorf("error parsing raw url %s: %w", rawURL, err)
+	}
+
+	// get query params from url
+	q := u.Query()
+
+	// set global and request based query params, overwrite path query params
+	for k, vs := range c.mergeQueryParams(inputParams) {
+		q[k] = vs
+	}
+
+	u.RawQuery = q.Encode()
+
+	return u.String(), nil
 }
 
 func (c *Client) do(info *requestInfo, result any) (*Response, error) {
@@ -159,6 +198,8 @@ func (c *Client) do(info *requestInfo, result any) (*Response, error) {
 		return nil, fmt.Errorf("empty response should not occur")
 	}
 
+	c.log("response status: %s...", resp.Status)
+
 	defer cleanupResponse(resp)
 
 	var bodyReader io.Reader = resp.Body
@@ -172,6 +213,10 @@ func (c *Client) do(info *requestInfo, result any) (*Response, error) {
 		}
 
 		err = c.readResponse(bodyReader, result)
+	}
+
+	for k, v := range resp.Header {
+		c.log("response header %s: [%s]", k, strings.Join(v, ","))
 	}
 
 	return &Response{

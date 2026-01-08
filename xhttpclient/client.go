@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"net/url"
+	"strings"
 	"time"
 
 	"golang.org/x/time/rate"
@@ -23,17 +25,19 @@ type Client struct {
 	limiter           *rate.Limiter
 	recycleConnection bool
 	header            http.Header
+	queryParams       url.Values
 	trackProgress     bool
 	needRetry         NeedRetryFunc
 	marshal           func(any) ([]byte, error)
 	unmarshal         func([]byte, any) error
 	logf              LogFunc
 	contentFormat     string
+	verbose           bool
 }
 
 func New(baseURL string, options ...Option) *Client {
 	c := &Client{
-		baseURL:           baseURL,
+		baseURL:           strings.TrimSuffix(baseURL, "/"),
 		timeout:           DefaultTimeout,
 		maxRetry:          DefaultMaxRetry,
 		waitMin:           DefaultWaitMin,
@@ -62,10 +66,4 @@ func New(baseURL string, options ...Option) *Client {
 	}
 
 	return c
-}
-
-func (c *Client) log(format string, v ...interface{}) {
-	if c.logf != nil {
-		c.logf(format, v...)
-	}
 }
