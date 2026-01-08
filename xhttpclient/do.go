@@ -111,11 +111,9 @@ func (c *Client) buildUrl(path string, inputParams url.Values) (string, error) {
 	// get query params from url
 	q := u.Query()
 
-	// add global and request based query params
+	// set global and request based query params, overwrite path query params
 	for k, vs := range c.mergeQueryParams(inputParams) {
-		for _, v := range vs {
-			q.Add(k, v)
-		}
+		q[k] = vs
 	}
 
 	u.RawQuery = q.Encode()
