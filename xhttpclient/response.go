@@ -14,12 +14,14 @@ func (c *Client) readResponse(b io.Reader, result any) error {
 		if err != nil {
 			return err
 		}
+		c.logBody(body)
 		*t = body
 	default:
 		body, err := io.ReadAll(b)
 		if err != nil {
 			return err
 		}
+		c.logBody(body)
 		if c.unmarshal != nil {
 			return c.unmarshal(body, result)
 		}

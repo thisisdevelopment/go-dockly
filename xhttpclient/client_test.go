@@ -73,9 +73,16 @@ func TestClient(t *testing.T) {
 
 	ts.Test1 = "ts1"
 	ts.Test2 = "ts2"
+	h := http.Header{}
+	h.Add("Accept", "application/json")
 
-	client := New(server.URL, WithLog(logger.Debugf))
-	statusCode, err := client.Do(context.Background(), "GET", "/test", &ts, &ts, url.Values{"test": {"test1"}, "test2": {"test2"}})
+	client := New(
+		server.URL,
+		WithLog(logger.Debugf),
+		WithVerbose(true),
+		WithQueryParamMap(map[string]string{"hallo": "hello"}),
+	)
+	statusCode, err := client.Do(context.Background(), "GET", "/test?ali=baba", &ts, &ts, url.Values{"test": {"test1"}, "test2": {"test2"}}, h)
 	if err != nil {
 		log.Printf("err statusCode: %d", statusCode)
 		log.Printf("context cancelled? %v", errors.Is(err, context.Canceled))

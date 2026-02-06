@@ -3,6 +3,7 @@ package xhttpclient
 import (
 	"golang.org/x/time/rate"
 	"net/http"
+	"net/url"
 	"time"
 )
 
@@ -11,6 +12,12 @@ type Option func(c *Client)
 func WithHTTPClient(httpClient *http.Client) Option {
 	return func(c *Client) {
 		c.httpClient = httpClient
+	}
+}
+
+func WithVerbose(verbose bool) Option {
+	return func(c *Client) {
+		c.verbose = verbose
 	}
 }
 
@@ -71,6 +78,24 @@ func WithHeaderMap(headerMap map[string]string) Option {
 		}
 
 		c.header = header
+	}
+}
+
+func WithQueryParams(params url.Values) Option {
+	return func(c *Client) {
+		c.queryParams = params
+	}
+}
+
+func WithQueryParamMap(paramMap map[string]string) Option {
+	return func(c *Client) {
+		params := make(url.Values)
+
+		for k, v := range paramMap {
+			params.Set(k, v)
+		}
+
+		c.queryParams = params
 	}
 }
 
