@@ -117,13 +117,11 @@ func (c *cache) Items() map[string]Item {
 // delete all expired items from the cache.
 func (c *cache) deleteExpired() {
 	now := time.Now().UnixNano()
-	c.mu.Lock()
 	for k, v := range c.items {
 		if v.Expiration > 0 && now > v.Expiration {
 			c.Delete(k)
 		}
 	}
-	c.mu.Unlock()
 }
 
 // Delete an item from the cache. Does nothing if the key is not in the cache.
